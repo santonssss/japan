@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>田中さんの一日 — JFT-Basic A2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ БАЗА ============ */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.9;
+  font-size: var(--base-font-size, 18px);
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+}
+:root {
+  --bg: #1a1d24;
+  --text: #e8e8e8;
+  --muted: #9aa0aa;
+  --card: #232730;
+  --border: #353a47;
+  --accent: #6aa8ff;
+  --accent-2: #4a8fd6;
+  --hover: #2c313c;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --base-font-size: 18px;
+}
+body.theme-light {
+  --bg: #fafaf7;
+  --text: #1f2329;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --border: #e2e5ea;
+  --accent: #2563eb;
+  --accent-2: #1d4ed8;
+  --hover: #f0f2f5;
+  --shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ============ РАЗМЕР ШРИФТА ============ */
+body[data-fontsize="small"]  { --base-font-size: 16px; }
+body[data-fontsize="medium"] { --base-font-size: 19px; }
+body[data-fontsize="large"]  { --base-font-size: 23px; }
+
+/* ============ ШАПКА ============ */
+header.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 18px;
+  box-shadow: var(--shadow);
+}
+.app-title {
+  margin: 0 0 10px 0;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--accent);
+}
+.app-title small {
+  font-size: 0.55em;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+}
+.controls {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 10px;
+}
+.controls button, .controls select {
+  font-family: inherit;
+  font-size: 0.82em;
+  padding: 6px 12px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.controls button:hover, .controls select:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+}
+.controls button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.session-nav {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 10px;
+}
+.session-nav button {
+  font-family: inherit;
+  font-size: 0.82em;
+  padding: 7px 13px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 100px;
+}
+.session-nav button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.progress-block {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  width: 0%;
+  transition: width 0.4s;
+}
+.progress-text { font-variant-numeric: tabular-nums; min-width: 110px; text-align: right; }
+
+/* ============ ОСНОВНОЙ КОНТЕНТ ============ */
+main { max-width: 820px; margin: 0 auto; padding: 20px 18px 60px; }
+
+.session {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.session.active { display: block; }
+.session h2 {
+  margin: 0 0 6px 0;
+  font-size: 1.4em;
+  color: var(--accent);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
+}
+.session h2 .session-sub {
+  display: block;
+  font-size: 0.6em;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.chapter {
+  margin: 22px 0 26px 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+}
+.chapter:first-of-type { border-top: none; padding-top: 0; }
+.chapter h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.15em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chapter h3 .ch-num {
+  background: var(--accent);
+  color: white;
+  font-size: 0.7em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.chapter-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
+  color: var(--muted);
+  margin: 6px 0 12px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.chapter-read input { cursor: pointer; transform: scale(1.2); }
+.chapter.read .chapter-read { color: var(--accent); }
+.chapter.read h3 .ch-num { background: #2f9e44; }
+.chapter p { margin: 0 0 1em 0; text-align: justify; }
+.chapter p.dialogue { padding-left: 1em; }
+
+/* ============ ФУРИГАНА ============ */
+ruby { ruby-align: center; }
+rt {
+  font-size: 0.55em;
+  color: var(--muted);
+  user-select: none;
+}
+body.furigana-hidden rt { display: none; }
+body.furigana-hover ruby:hover rt,
+body.furigana-hover ruby:focus rt {
+  display: inline;
+}
+
+/* ============ СПОЙЛЕР СЛОВАРЯ ============ */
+.vocab-spoiler {
+  margin-top: 22px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.vocab-spoiler summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--accent);
+  user-select: none;
+  outline: none;
+}
+.vocab-spoiler summary:hover { color: var(--accent-2); }
+.vocab-spoiler .vocab-hint {
+  color: var(--muted);
+  font-size: 0.85em;
+  margin-left: 6px;
+  font-weight: 400;
+}
+.vocab-list {
+  margin: 12px 0 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 14px;
+}
+.vocab-list li {
+  font-size: 0.9em;
+  padding: 5px 0;
+  border-bottom: 1px dotted var(--border);
+}
+.vocab-list .v-jp { margin-right: 6px; }
+.vocab-list .v-jp rt { color: var(--muted); }
+.vocab-list .v-ru { color: var(--muted); }
+.vocab-list .v-tag {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 4px;
+  background: var(--border);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.vocab-empty {
+  color: var(--muted);
+  font-size: 0.9em;
+  margin: 10px 0 0 0;
+  font-style: italic;
+}
+
+/* ============ ФИНАЛ ============ */
+.finale-marker {
+  text-align: center;
+  font-size: 1.3em;
+  color: var(--accent);
+  margin: 30px 0 14px 0;
+  letter-spacing: 4px;
+}
+
+/* ============ МОБИЛЬНАЯ АДАПТАЦИЯ ============ */
+@media (max-width: 600px) {
+  .controls { gap: 5px; }
+  .controls button, .controls select { font-size: 0.78em; padding: 5px 9px; }
+  .session-nav button { font-size: 0.78em; padding: 6px 9px; min-width: 0; }
+  .app-title { font-size: 1.15em; }
+  main { padding: 14px 10px 50px; }
+  .session { padding: 14px 14px; }
+  .progress-block { font-size: 0.78em; }
+}
+</style>
+</head>
+<body class="theme-dark furigana-shown" data-fontsize="medium">
+
+<header class="app-header">
+  <h1 class="app-title">田中さんの一日 <small>JFT-Basic A2 · 13 глав · 4 сессии</small></h1>
+
+  <div class="controls" role="toolbar" aria-label="Настройки чтения">
+    <button id="btn-furigana-show" class="active" title="Показывает фуригану всегда">ふ り が な ✓</button>
+    <button id="btn-furigana-hide" title="Скрывает всю фуригану">ふりがな ×</button>
+    <button id="btn-furigana-hover" title="Скрыть, но показывать при наведении/тапе">по наведению</button>
+    <select id="sel-fontsize" title="Размер шрифта" aria-label="Размер шрифта">
+      <option value="small">Шрифт: мелкий</option>
+      <option value="medium" selected>Шрифт: обычный</option>
+      <option value="large">Шрифт: крупный</option>
+    </select>
+    <button id="btn-theme" title="Сменить тему">☀ тема</button>
+    <button id="btn-reset" title="Сбросить прогресс" style="color:#e35a5a">↻ сброс</button>
+  </div>
+
+  <div class="session-nav" role="tablist" aria-label="Сессии">
+    <button data-session="1" class="active">① Утро + дорога + офис<span>Главы 1–3</span></button>
+    <button data-session="2">② Ланч + звонок + 市役所<span>Главы 4–6</span></button>
+    <button data-session="3">③ Покупки + дом + утро<span>Главы 7–9</span></button>
+    <button data-session="4">④ Зубной + презентация + семья<span>Главы 10–13 + финал</span></button>
+  </div>
+
+  <div class="progress-block">
+    <span class="progress-label">Прогресс:</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <span class="progress-text" id="prog-text">0 / 13 (0%)</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ================================================== -->
+<!-- СЕССИЯ 1: Главы 1-3 -->
+<!-- ================================================== -->
+<article class="session active" data-session="1">
+<h2>Сессия 1 — Утро, дорога, офис<span class="session-sub">Главы 1・2・3 · ~10 мин чтения</span></h2>
+
+<section class="chapter" data-chapter="1">
+  <h3><span class="ch-num">第1章</span> <ruby>田中<rt>たなか</rt></ruby>さんの<ruby>朝<rt>あさ</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p>7<ruby>月<rt>がつ</rt></ruby>20<ruby>日<rt>にち</rt></ruby>、<ruby>月曜日<rt>げつようび</rt></ruby>。<ruby>朝<rt>あさ</rt></ruby>の<ruby>空気<rt>くうき</rt></ruby>は<ruby>暖<rt>あたた</rt></ruby>かくて、<ruby>天気予報<rt>てんきよほう</rt></ruby>によると、<ruby>午前中<rt>ごぜんちゅう</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れて<ruby>暑<rt>あつ</rt></ruby>くなるが、<ruby>午後<rt>ごご</rt></ruby>は<ruby>強<rt>つよ</rt></ruby>い<ruby>風<rt>かぜ</rt></ruby>が<ruby>吹<rt>ふ</rt></ruby>いて、<ruby>台風<rt>たいふう</rt></ruby>が<ruby>来<rt>く</rt></ruby>るかもしれないと<ruby>言<rt>い</rt></ruby>っていた。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>最近<rt>さいきん</rt></ruby><ruby>三十歳<rt>さんじっさい</rt></ruby>になった<ruby>会社員<rt>かいしゃいん</rt></ruby>だ。<ruby>寝室<rt>しんしつ</rt></ruby>で<ruby>目<rt>め</rt></ruby>を<ruby>覚<rt>さ</rt></ruby>まして、<ruby>ベッド<rt>べっど</rt></ruby>から<ruby>起<rt>お</rt></ruby>き<ruby>上<rt>あ</rt></ruby>がり、あくびを<ruby>しながら<rt>しながら</rt></ruby><ruby>お風呂場<rt>おふろば</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。<ruby>顔<rt>かお</rt></ruby>を<ruby>洗<rt>あら</rt></ruby>って、<ruby>歯<rt>は</rt></ruby>を<ruby>磨<rt>みが</rt></ruby>き、<ruby>タオル<rt>たおる</rt></ruby>で<ruby>拭<rt>ふ</rt></ruby>いた。<ruby>鏡<rt>かがみ</rt></ruby>を<ruby>見<rt>み</rt></ruby>ながら、<ruby>今日<rt>きょう</rt></ruby>の<ruby>予定<rt>よてい</rt></ruby>を<ruby>頭<rt>あたま</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>考<rt>かんが</rt></ruby>えた。そして、<ruby>リビング<rt>りびんぐ</rt></ruby>に<ruby>行<rt>い</rt></ruby>って、<ruby>庭<rt>にわ</rt></ruby>を<ruby>見<rt>み</rt></ruby>た。<ruby>家<rt>いえ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>は<ruby>静<rt>しず</rt></ruby>かで、とても<ruby>居心地<rt>いごこち</rt></ruby>が<ruby>良<rt>よ</rt></ruby>かった。</p>
+  <p><ruby>台所<rt>だいどころ</rt></ruby>では、<ruby>妻<rt>つま</rt></ruby>のゆみさんがもう<ruby>朝ご飯<rt>あさごはん</rt></ruby>を<ruby>作<rt>つく</rt></ruby>っていた。<ruby>彼女<rt>かのじょ</rt></ruby>も<ruby>三十歳<rt>さんじっさい</rt></ruby>だ。<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>来<rt>く</rt></ruby>ると、<ruby>箸<rt>はし</rt></ruby>はすでに<ruby>並<rt>なら</rt></ruby>んでいて、<ruby>お茶碗<rt>おちゃわん</rt></ruby>の<ruby>中<rt>なか</rt></ruby>には<ruby>熱<rt>あつ</rt></ruby>いお<ruby>茶<rt>ちゃ</rt></ruby>が<ruby>入<rt>はい</rt></ruby>っていた。どうやら、いつもより<ruby>早<rt>はや</rt></ruby>く<ruby>起<rt>お</rt></ruby>きて、<ruby>彼<rt>かれ</rt></ruby>が<ruby>起<rt>お</rt></ruby>きる<ruby>前<rt>まえ</rt></ruby>に<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>準備<rt>じゅんび</rt></ruby>してくれたようだ。</p>
+  <p class="dialogue">「おはよう！」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>笑顔<rt>えがお</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。「<ruby>君<rt>きみ</rt></ruby>、ずいぶん<ruby>早<rt>はや</rt></ruby>く<ruby>起<rt>お</rt></ruby>きたんだね。<ruby>僕<rt>ぼく</rt></ruby>の<ruby>せ<rt>せ</rt></ruby>いで<ruby>眠<rt>ねむ</rt></ruby>れなかったの?」</p>
+  <p class="dialogue">「<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>だよ」とゆみさんは<ruby>言<rt>い</rt></ruby>いながら、<ruby>エプロン<rt>えぷろん</rt></ruby>で<ruby>手<rt>て</rt></ruby>を<ruby>拭<rt>ふ</rt></ruby>いた。「ちょうど<ruby>君<rt>きみ</rt></ruby>の<ruby>好<rt>す</rt></ruby>きな<ruby>味噌汁<rt>みそしる</rt></ruby>を<ruby>早<rt>はや</rt></ruby>く<ruby>作<rt>つく</rt></ruby>りたかったの。それに、<ruby>健太<rt>けんた</rt></ruby>ももうすぐ<ruby>起<rt>お</rt></ruby>きるみたいだから、どうせ<ruby>起<rt>お</rt></ruby>きなきゃいけなかったのよ。」</p>
+  <p>ゆみさんは、わざわざ<ruby>田中<rt>たなか</rt></ruby>さんのために<ruby>熱<rt>あつ</rt></ruby>い<ruby>味噌汁<rt>みそしる</rt></ruby>と<ruby>焼<rt>や</rt></ruby>き<ruby>魚<rt>ざかな</rt></ruby>と<ruby>卵<rt>たまご</rt></ruby>を<ruby>作<rt>つく</rt></ruby>ってくれた。だから、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>彼女<rt>かのじょ</rt></ruby>に<ruby>深<rt>ふか</rt></ruby>く<ruby>感謝<rt>かんしゃ</rt></ruby>していた。<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>妻<rt>つま</rt></ruby>へのお<ruby>礼<rt>れい</rt></ruby>に、<ruby>新鮮<rt>しんせん</rt></ruby>なジュースを<ruby>食器<rt>しょっき</rt></ruby>に<ruby>注<rt>そそ</rt></ruby>いであげた。<ruby>自分<rt>じぶん</rt></ruby>は、<ruby>香<rt>かお</rt></ruby>りの<ruby>良<rt>よ</rt></ruby>いコーヒーを<ruby>一杯<rt>いっぱい</rt></ruby><ruby>入<rt>い</rt></ruby>れた。</p>
+  <p><ruby>二人<rt>ふたり</rt></ruby>がテーブルに<ruby>座<rt>すわ</rt></ruby>ると、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「いただきます!」</p>
+  <p class="dialogue">「おはよう!どうぞ、<ruby>召<rt>め</rt></ruby>し<ruby>上<rt>あ</rt></ruby>がって。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>朝ご飯<rt>あさごはん</rt></ruby>を<ruby>食<rt>た</rt></ruby>べながら、<ruby>家族<rt>かぞく</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>になった。</p>
+  <p class="dialogue">「<ruby>昨日<rt>きのう</rt></ruby>、<ruby>母<rt>はは</rt></ruby>から<ruby>電話<rt>でんわ</rt></ruby>があったの。」ゆみさんが<ruby>言<rt>い</rt></ruby>った。「<ruby>父<rt>ちち</rt></ruby>と<ruby>祖父<rt>そふ</rt></ruby>がよろしくって、<ruby>来週<rt>らいしゅう</rt></ruby>、<ruby>祖母<rt>そぼ</rt></ruby>が<ruby>孫<rt>まご</rt></ruby>たちに<ruby>会<rt>あ</rt></ruby>いに<ruby>来<rt>き</rt></ruby>たいって。」</p>
+  <p class="dialogue">「それは<ruby>素晴らしい<rt>すばら</rt></ruby>ね。」と<ruby>田中<rt>たなか</rt></ruby>さんはコーヒーを<ruby>飲<rt>の</rt></ruby>みながら<ruby>答<rt>こた</rt></ruby>えた。「<ruby>僕<rt>ぼく</rt></ruby>の<ruby>兄<rt>あに</rt></ruby>は<ruby>今<rt>いま</rt></ruby>、<ruby>出張中<rt>しゅっちょうちゅう</rt></ruby>で、<ruby>姉<rt>あね</rt></ruby>は<ruby>自分<rt>じぶん</rt></ruby>の<ruby>子供<rt>こども</rt></ruby>の<ruby>世話<rt>せわ</rt></ruby>をしている。<ruby>弟<rt>おとうと</rt></ruby>は<ruby>今週<rt>こんしゅう</rt></ruby>、<ruby>大学<rt>だいがく</rt></ruby>の<ruby>受験<rt>じゅけん</rt></ruby>をしていて、<ruby>妹<rt>いもうと</rt></ruby>は<ruby>学校<rt>がっこう</rt></ruby>に<ruby>通<rt>かよ</rt></ruby>っている。<ruby>兄弟<rt>きょうだい</rt></ruby>みんな、<ruby>今月<rt>こんげつ</rt></ruby>は<ruby>忙<rt>いそが</rt></ruby>しそうだ。もし<ruby>休<rt>やす</rt></ruby>みが<ruby>取<rt>と</rt></ruby>れたら、<ruby>僕<rt>ぼく</rt></ruby>も<ruby>実家<rt>じっか</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>りたいな。」</p>
+  <p><ruby>寝室<rt>しんしつ</rt></ruby>から<ruby>泣<rt>な</rt></ruby>き<ruby>声<rt>ごえ</rt></ruby>が<ruby>聞<rt>きこ</rt></ruby>えてきた。<ruby>一人息子<rt>ひとりむすこ</rt></ruby>の<ruby>健太<rt>けんた</rt></ruby>が<ruby>起<rt>お</rt></ruby>きた。<ruby>健太<rt>けんた</rt></ruby>は<ruby>最近<rt>さいきん</rt></ruby><ruby>一歳<rt>いっさい</rt></ruby>になったばかりだ。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>立<rt>た</rt></ruby>ち<ruby>上<rt>あ</rt></ruby>がって、<ruby>先週末<rt>せんしゅうまつ</rt></ruby>に<ruby>買<rt>か</rt></ruby>っておいたおもちゃを<ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>し、<ruby>子供<rt>こども</rt></ruby>に<ruby>渡<rt>わた</rt></ruby>して、<ruby>泣<rt>な</rt></ruby>き<ruby>止<rt>や</rt></ruby>ませた。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>は、ぜったいに<ruby>遅刻<rt>ちこく</rt></ruby>しないで<ruby>帰<rt>かえ</rt></ruby>ってきてね。」とゆみさんが<ruby>言<rt>い</rt></ruby>った。「もし<ruby>早<rt>はや</rt></ruby>く<ruby>仕事<rt>しごと</rt></ruby>が<ruby>終<rt>お</rt></ruby>わったら、<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>公園<rt>こうえん</rt></ruby>へ<ruby>散歩<rt>さんぽ</rt></ruby>に<ruby>行<rt>い</rt></ruby>けるわ。」</p>
+  <p class="dialogue">「<ruby>毎日<rt>まいにち</rt></ruby>、<ruby>定時<rt>ていじ</rt></ruby>で<ruby>上<rt>あ</rt></ruby>がる<ruby>よう<rt>よう</rt></ruby>に<ruby>心掛<rt>こころが</rt></ruby>けているよ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>答<rt>こた</rt></ruby>えた。「<ruby>今夜<rt>こんや</rt></ruby>、<ruby>帰<rt>かえ</rt></ruby>ったら、<ruby>必<rt>かなら</rt></ruby>ず<ruby>健太<rt>けんた</rt></ruby>と<ruby>遊<rt>あそ</rt></ruby>んであげるからね。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>食器<rt>しょっき</rt></ruby>を<ruby>片<rt>かた</rt></ruby>づけて、</p>
+  <p class="dialogue">「ごちそうさま!とても<ruby>お腹<rt>おなか</rt></ruby>いっぱいだよ。<ruby>今日<rt>きょう</rt></ruby>も<ruby>頑張<rt>がんば</rt></ruby>って<ruby>仕事<rt>しごと</rt></ruby>をしてくるね。」</p>
+  <p class="dialogue">「<ruby>家族<rt>かぞく</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>大切<rt>たいせつ</rt></ruby>だな。」と<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>玄関<rt>げんかん</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かいながら<ruby>心<rt>こころ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>今日<rt>きょう</rt></ruby>も<ruby>仕事<rt>しごと</rt></ruby>はたくさんあるだろう。<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>時間内<rt>じかんない</rt></ruby>に<ruby>終<rt>お</rt></ruby>わらせて、<ruby>遅刻<rt>ちこく</rt></ruby>せずに<ruby>帰<rt>かえ</rt></ruby>りたいな。」</p>
+</section>
+
+<section class="chapter" data-chapter="2">
+  <h3><span class="ch-num">第2章</span> <ruby>駅<rt>えき</rt></ruby>までの<ruby>道<rt>みち</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>玄関<rt>げんかん</rt></ruby>に<ruby>出<rt>で</rt></ruby>た。もし<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>っても<ruby>濡<rt>ぬ</rt></ruby>れないように、<ruby>長<rt>なが</rt></ruby>い<ruby>黒<rt>くろ</rt></ruby>い<ruby>傘<rt>かさ</rt></ruby>を<ruby>持<rt>も</rt></ruby>っていくことにした。<ruby>白<rt>しろ</rt></ruby>いシャツに、<ruby>黒<rt>くろ</rt></ruby>いズボン、<ruby>茶色<rt>ちゃいろ</rt></ruby>い<ruby>靴<rt>くつ</rt></ruby>、そして<ruby>青<rt>あお</rt></ruby>い<ruby>上着<rt>うわぎ</rt></ruby>を<ruby>着<rt>き</rt></ruby>た。<ruby>軽<rt>かる</rt></ruby>いコートを<ruby>肩<rt>かた</rt></ruby>にかけ、<ruby>眼鏡<rt>めがね</rt></ruby>をかけ、ネクタイを<ruby>締<rt>し</rt></ruby>め、ベルトをした。カバンを<ruby>手<rt>て</rt></ruby>に<ruby>取<rt>と</rt></ruby>った。<ruby>中<rt>なか</rt></ruby>には、<ruby>面白<rt>おもしろ</rt></ruby>そうな<ruby>本<rt>ほん</rt></ruby>が<ruby>入<rt>はい</rt></ruby>っていた。</p>
+  <p><ruby>家<rt>いえ</rt></ruby>の<ruby>表<rt>おもて</rt></ruby>のドアから<ruby>外<rt>そと</rt></ruby>に<ruby>出<rt>で</rt></ruby>ると、<ruby>駐車場<rt>ちゅうしゃじょう</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。そこには、<ruby>彼<rt>かれ</rt></ruby>の<ruby>車<rt>くるま</rt></ruby>と<ruby>自転車<rt>じてんしゃ</rt></ruby>が<ruby>止<rt>と</rt></ruby>まっていた。<ruby>平日<rt>へいじつ</rt></ruby>は、<ruby>渋滞<rt>じゅうたい</rt></ruby>で<ruby>遅刻<rt>ちこく</rt></ruby>しそうになるから、<ruby>電車<rt>でんしゃ</rt></ruby>や<ruby>地下鉄<rt>ちかてつ</rt></ruby>で<ruby>会社<rt>かいしゃ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>くことが<ruby>多<rt>おお</rt></ruby>い。</p>
+  <p><ruby>駅<rt>えき</rt></ruby>までの<ruby>道<rt>みち</rt></ruby>のりで、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>公園<rt>こうえん</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>を<ruby>通<rt>とお</rt></ruby>った。ベンチのそばでは、<ruby>小<rt>ちい</rt></ruby>さい<ruby>犬<rt>いぬ</rt></ruby>が<ruby>走<rt>はし</rt></ruby>り<ruby>回<rt>まわ</rt></ruby>っていた。お<ruby>店<rt>みせ</rt></ruby>の<ruby>大<rt>おお</rt></ruby>きな<ruby>看板<rt>かんばん</rt></ruby>には、<ruby>牛<rt>うし</rt></ruby>の<ruby>絵<rt>え</rt></ruby>が<ruby>描<rt>えが</rt></ruby>かれていた。だんだん<ruby>天気<rt>てんき</rt></ruby>が<ruby>変<rt>か</rt></ruby>わってきた。<ruby>風<rt>かぜ</rt></ruby>が<ruby>強<rt>つよ</rt></ruby>く<ruby>吹<rt>ふ</rt></ruby>き、<ruby>涼<rt>すず</rt></ruby>しくなった。<ruby>空<rt>そら</rt></ruby>が<ruby>暗<rt>くら</rt></ruby>くなって、もうすぐ<ruby>大雨<rt>おおあめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>りそうだった。</p>
+  <p><ruby>公園<rt>こうえん</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くで、<ruby>知<rt>し</rt></ruby>らない<ruby>年配<rt>ねんぱい</rt></ruby>の<ruby>男性<rt>だんせい</rt></ruby>に<ruby>声<rt>こえ</rt></ruby>をかけられた。</p>
+  <p class="dialogue">「すみません。」その<ruby>人<rt>ひと</rt></ruby>は<ruby>言<rt>い</rt></ruby>った。「<ruby>私<rt>わたし</rt></ruby>は<ruby>今<rt>いま</rt></ruby>、ほかの<ruby>町<rt>まち</rt></ruby>から<ruby>来<rt>き</rt></ruby>たものですが、<ruby>道<rt>みち</rt></ruby>に<ruby>迷<rt>まよ</rt></ruby>ってしまいました。<ruby>新宿駅<rt>しんじゅくえき</rt></ruby>へは、どうやって<ruby>行<rt>い</rt></ruby>けばいいでしょうか。」</p>
+  <p class="dialogue">「はい、この<ruby>道<rt>みち</rt></ruby>をまっすぐ<ruby>行<rt>い</rt></ruby>って、<ruby>信号<rt>しんごう</rt></ruby>を<ruby>左<rt>ひだり</rt></ruby>に<ruby>曲<rt>ま</rt></ruby>がると、<ruby>大<rt>おお</rt></ruby>きな<ruby>駅<rt>えき</rt></ruby>の<ruby>建物<rt>たてもの</rt></ruby>がすぐ<ruby>見<rt>み</rt></ruby>えますよ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>答<rt>こた</rt></ruby>えた。「5<ruby>分<rt>ふん</rt></ruby>もかからないと<ruby>思<rt>おも</rt></ruby>います。」</p>
+  <p class="dialogue">「ありがとうございます!とても<ruby>助<rt>たす</rt></ruby>かりました。」</p>
+  <p class="dialogue">「どういたしまして。<ruby>気<rt>き</rt></ruby>をつけてくださいね。もうすぐ<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>りそうですから。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>駅<rt>えき</rt></ruby>の<ruby>建物<rt>たてもの</rt></ruby>に<ruby>着<rt>つ</rt></ruby>いた。<ruby>切符売<rt>きっぷう</rt></ruby>り<ruby>場<rt>ば</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>には、<ruby>何人<rt>なんにん</rt></ruby>か<ruby>人<rt>ひと</rt></ruby>が<ruby>並<rt>なら</rt></ruby>んでいた。<ruby>自動販売機<rt>じどうはんばいき</rt></ruby>で、200<ruby>円<rt>えん</rt></ruby>の<ruby>切符<rt>きっぷ</rt></ruby>を<ruby>現金<rt>げんきん</rt></ruby>で<ruby>買<rt>か</rt></ruby>い、<ruby>改札<rt>かいさつ</rt></ruby>を<ruby>通<rt>とお</rt></ruby>って、ホームへ<ruby>上<rt>あ</rt></ruby>がった。もう<ruby>一度<rt>いちど</rt></ruby><ruby>切符<rt>きっぷ</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、<ruby>行<rt>い</rt></ruby>き<ruby>先<rt>さき</rt></ruby>を<ruby>間違<rt>まちが</rt></ruby>えていないか<ruby>確<rt>たし</rt></ruby>かめた。<ruby>電光掲示板<rt>でんこうけいじばん</rt></ruby>を<ruby>見<rt>み</rt></ruby>ると、<ruby>電車<rt>でんしゃ</rt></ruby>は10<ruby>分後<rt>ふんご</rt></ruby>に<ruby>来<rt>く</rt></ruby>るはずだった。「<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>遅<rt>おく</rt></ruby>れなければ、<ruby>薬局<rt>やっきょく</rt></ruby>に<ruby>寄<rt>よ</rt></ruby>って、<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>うな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>思<rt>おも</rt></ruby>った。<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>来<rt>く</rt></ruby>るまで、まだ<ruby>少<rt>すこ</rt></ruby>し<ruby>時間<rt>じかん</rt></ruby>があったので、<ruby>近<rt>ちか</rt></ruby>くにある<ruby>薬局<rt>やっきょく</rt></ruby>と<ruby>郵便局<rt>ゆうびんきょく</rt></ruby>と<ruby>図書館<rt>としょかん</rt></ruby>に、<ruby>急<rt>いそ</rt></ruby>いで<ruby>寄<rt>よ</rt></ruby>ることにした。</p>
+  <p><ruby>薬局<rt>やっきょく</rt></ruby>では、<ruby>丁寧<rt>ていねい</rt></ruby>な<ruby>薬剤師<rt>やくざいし</rt></ruby>が<ruby>出迎<rt>でむか</rt></ruby>えてくれた。</p>
+  <p class="dialogue">「いらっしゃいませ。<ruby>何<rt>なに</rt></ruby>かお<ruby>探<rt>さが</rt></ruby>しでしょうか。」</p>
+  <p class="dialogue">「こんにちは。<ruby>昨日<rt>きのう</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>から、<ruby>頭<rt>あたま</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>くて、<ruby>熱<rt>ねつ</rt></ruby>が<ruby>出<rt>で</rt></ruby>て、<ruby>咳<rt>せき</rt></ruby>も<ruby>出<rt>で</rt></ruby><ruby>始<rt>はじ</rt></ruby>めたんです。<ruby>効<rt>き</rt></ruby>きそうな<ruby>薬<rt>くすり</rt></ruby>はありませんか。<ruby>実<rt>じつ</rt></ruby>は、<ruby>今日<rt>きょう</rt></ruby>は<ruby>大事<rt>だいじ</rt></ruby>なプレゼンがあって、<ruby>体調<rt>たいちょう</rt></ruby>を<ruby>良<rt>よ</rt></ruby>く<ruby>してお<rt>してお</rt></ruby>きたいんです。」</p>
+  <p class="dialogue">「はい、これをどうぞ。<ruby>錠剤<rt>じょうざい</rt></ruby>と、<ruby>咳止<rt>せきど</rt></ruby>めのシロップがおすすめです。<ruby>必<rt>かなら</rt></ruby>ず<ruby>食後<rt>しょくご</rt></ruby>に<ruby>服用<rt>ふくよう</rt></ruby>してください。もし<ruby>明日<rt>あした</rt></ruby>まで<ruby>症状<rt>しょうじょう</rt></ruby>が<ruby>治<rt>なお</rt></ruby>らなかったら、<ruby>必<rt>かなら</rt></ruby>ず<ruby>病院<rt>びょういん</rt></ruby>へ<ruby>行<rt>い</rt></ruby>ってくださいね。」</p>
+  <p class="dialogue">「ありがとうございます、<ruby>助<rt>たす</rt></ruby>かります。いくらですか。」</p>
+  <p class="dialogue">「1500<ruby>円<rt>えん</rt></ruby>です。お<ruby>大事<rt>だいじ</rt></ruby>に!お<ruby>気<rt>き</rt></ruby>をつけて。」</p>
+  <p><ruby>薬<rt>くすり</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>取<rt>と</rt></ruby>って、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>説明書<rt>せつめいしょ</rt></ruby>をよく<ruby>読<rt>よ</rt></ruby>んだ。<ruby>箱<rt>はこ</rt></ruby>には「<ruby>食後<rt>しょくご</rt></ruby>に、<ruby>一日<rt>いちにち</rt></ruby><ruby>三回<rt>さんかい</rt></ruby>、<ruby>飲<rt>の</rt></ruby>んでください」と<ruby>書<rt>か</rt></ruby>いてあった。<ruby>早<rt>はや</rt></ruby>く<ruby>治<rt>なお</rt></ruby>るように、<ruby>指示<rt>しじ</rt></ruby>をちゃんと<ruby>守<rt>まも</rt></ruby>ることにした。それから、<ruby>図書館<rt>としょかん</rt></ruby>の<ruby>隣<rt>となり</rt></ruby>の<ruby>建物<rt>たてもの</rt></ruby>に<ruby>入<rt>はい</rt></ruby>って、<ruby>読<rt>よ</rt></ruby>み<ruby>終<rt>お</rt></ruby>わった<ruby>本<rt>ほん</rt></ruby>を<ruby>返却<rt>へんきゃく</rt></ruby>し、<ruby>仕事<rt>しごと</rt></ruby>に<ruby>必要<rt>ひつよう</rt></ruby>な<ruby>資料<rt>しりょう</rt></ruby>を<ruby>新<rt>あら</rt></ruby>しく<ruby>借<rt>か</rt></ruby>りた。それから<ruby>郵便局<rt>ゆうびんきょく</rt></ruby>に<ruby>立<rt>た</rt></ruby>ち<ruby>寄<rt>よ</rt></ruby>って、<ruby>親戚<rt>しんせき</rt></ruby>に<ruby>手紙<rt>てがみ</rt></ruby>を<ruby>二通<rt>につう</rt></ruby><ruby>出<rt>だ</rt></ruby>し、<ruby>銀行<rt>ぎんこう</rt></ruby>でキャッシュカードから<ruby>少<rt>すこ</rt></ruby>しお<ruby>金<rt>かね</rt></ruby>をおろした。</p>
+  <p>「<ruby>駅<rt>えき</rt></ruby>はいつも<ruby>混雑<rt>こんざつ</rt></ruby>しているな。」と<ruby>田中<rt>たなか</rt></ruby>さんはホームに<ruby>戻<rt>もど</rt></ruby>りながら<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>早<rt>はや</rt></ruby>めに<ruby>来<rt>く</rt></ruby>れば、<ruby>何<rt>なに</rt></ruby>でも<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>う。<ruby>一番<rt>いちばん</rt></ruby><ruby>大事<rt>だいじ</rt></ruby>なのは、<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>遅刻<rt>ちこく</rt></ruby>しないことだ。」</p>
+</section>
+
+<section class="chapter" data-chapter="3">
+  <h3><span class="ch-num">第3章</span> オフィスでの<ruby>一日<rt>いちにち</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p>ホームに<ruby>戻<rt>もど</rt></ruby>ると、やってきた<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>り<ruby>込<rt>こ</rt></ruby>んだ。<ruby>車内<rt>しゃない</rt></ruby>はとても<ruby>混雑<rt>こんざつ</rt></ruby>していて、<ruby>立<rt>た</rt></ruby>つのもやっとな<ruby>程<rt>ほど</rt></ruby>だった。<ruby>車内案内<rt>しゃないあんない</rt></ruby>が<ruby>流<rt>なが</rt></ruby>れた。「<ruby>次<rt>つぎ</rt></ruby>は<ruby>新宿<rt>しんじゅく</rt></ruby>です。ドアは<ruby>左側<rt>ひだりがわ</rt></ruby>に<ruby>開<rt>ひら</rt></ruby>きます。お<ruby>忘<rt>わす</rt></ruby>れ<ruby>物<rt>もの</rt></ruby>に<ruby>注意<rt>ちゅうい</rt></ruby>してください。」20<ruby>分後<rt>ふんご</rt></ruby>、<ruby>終点<rt>しゅうてん</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>に<ruby>着<rt>つ</rt></ruby>き、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>降<rt>お</rt></ruby>りて、<ruby>会社<rt>かいしゃ</rt></ruby>のオフィスビルまで<ruby>歩<rt>ある</rt></ruby>いていった。</p>
+  <p>オフィスに<ruby>入<rt>はい</rt></ruby>ると、<ruby>田中<rt>たなか</rt></ruby>さんはお<ruby>辞儀<rt>じぎ</rt></ruby>をして、<ruby>大<rt>おお</rt></ruby>きな<ruby>声<rt>こえ</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「おはようございます!<ruby>少<rt>すこ</rt></ruby>し<ruby>遅<rt>おく</rt></ruby>くなって、すみません。」</p>
+  <p class="dialogue">「おはようございます、<ruby>田中<rt>たなか</rt></ruby>さん。」と<ruby>同僚<rt>どうりょう</rt></ruby>の<ruby>佐藤<rt>さとう</rt></ruby>さんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p class="dialogue">「プレゼンの<ruby>準備<rt>じゅんび</rt></ruby>は、もうできましたか。」と<ruby>佐藤<rt>さとう</rt></ruby>さんが<ruby>尋<rt>たず</rt></ruby>ねた。</p>
+  <p class="dialogue">「ええ、だいたい。でも、<ruby>書類<rt>しょるい</rt></ruby>をもう<ruby>一度<rt>いちど</rt></ruby><ruby>確認<rt>かくにん</rt></ruby>したいんです。」</p>
+  <p class="dialogue">「それはいい<ruby>考<rt>かんが</rt></ruby>えですね。<ruby>事前<rt>じぜん</rt></ruby>に<ruby>確認<rt>かくにん</rt></ruby>しておけば、ミスを<ruby>防<rt>ふせ</rt></ruby>げますよ。」</p>
+  <p class="dialogue">「だからこそ、<ruby>私<rt>わたし</rt></ruby>はいつも、<ruby>最後<rt>さいご</rt></ruby>のチェックの<ruby>時間<rt>じかん</rt></ruby>を<ruby>少<rt>すこ</rt></ruby>し<ruby>残<rt>のこ</rt></ruby>すようにしているんです。」</p>
+  <p>オフィスでは、<ruby>仕事<rt>しごと</rt></ruby>が<ruby>大変<rt>たいへん</rt></ruby><ruby>盛<rt>も</rt></ruby>んであった。机の<ruby>上<rt>うえ</rt></ruby>ではパソコンが<ruby>音<rt>おと</rt></ruby>を<ruby>立<rt>た</rt></ruby>て、<ruby>隅<rt>すみ</rt></ruby>では<ruby>経済<rt>けいざい</rt></ruby>ニュースを<ruby>伝<rt>つた</rt></ruby>えるテレビがついていた。<ruby>田中<rt>たなか</rt></ruby>さんの机には、ペンが<ruby>二本<rt>にほん</rt></ruby>と<ruby>大事<rt>だいじ</rt></ruby>な<ruby>報告書<rt>ほうこくしょ</rt></ruby>がきちんと<ruby>置<rt>お</rt></ruby>かれていた。</p>
+  <p><ruby>突然<rt>とつぜん</rt></ruby>、<ruby>厳<rt>きび</rt></ruby>しい<ruby>上司<rt>じょうし</rt></ruby>の<ruby>山田<rt>やまだ</rt></ruby>さんが<ruby>部屋<rt>へや</rt></ruby>から<ruby>出<rt>で</rt></ruby>てきた。<ruby>先月<rt>せんげつ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>書類<rt>しょるい</rt></ruby>でうっかりミスを<ruby>して<rt>して</rt></ruby>、<ruby>山田<rt>やまだ</rt></ruby>さんにひどく<ruby>叱<rt>しか</rt></ruby>られてしまった。その<ruby>以来<rt>いらい</rt></ruby>、<ruby>山田<rt>やまだ</rt></ruby>さんが机の<ruby>前<rt>まえ</rt></ruby>に<ruby>来<rt>く</rt></ruby>ると、いつも<ruby>緊張<rt>きんちょう</rt></ruby>してしまう。</p>
+  <p class="dialogue">「<ruby>田中<rt>たなか</rt></ruby>さん!」と<ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>厳<rt>きび</rt></ruby>しい<ruby>声<rt>こえ</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。「この<ruby>報告書<rt>ほうこくしょ</rt></ruby>の<ruby>書<rt>か</rt></ruby>き<ruby>方<rt>かた</rt></ruby>が<ruby>間違<rt>まちが</rt></ruby>っている。<ruby>昼<rt>ひる</rt></ruby>までに、<ruby>第三章<rt>だいさんしょう</rt></ruby>を<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>書<rt>か</rt></ruby>き<ruby>直<rt>なお</rt></ruby>させる!それに、<ruby>昨日<rt>きのう</rt></ruby>、<ruby>後輩<rt>こうはい</rt></ruby>を<ruby>一時間<rt>いちじかん</rt></ruby>も<ruby>待<rt>ま</rt></ruby>たせたそうだな。これ<ruby>以上<rt>いじょう</rt></ruby>、そんなことがあっては<ruby>困<rt>こま</rt></ruby>る。もっと<ruby>注意<rt>ちゅうい</rt></ruby>しろ!」</p>
+  <p class="dialogue">「すみません、<ruby>山田<rt>やまだ</rt></ruby>さん!」と<ruby>田中<rt>たなか</rt></ruby>さんはお<ruby>辞儀<rt>じぎ</rt></ruby>をした。「<ruby>今<rt>いま</rt></ruby>すぐ<ruby>直<rt>なお</rt></ruby>します。<ruby>直<rt>なお</rt></ruby>したら、<ruby>確認<rt>かくにん</rt></ruby>していただけませんか。」</p>
+  <p class="dialogue">「いいだろう。12<ruby>時<rt>じ</rt></ruby>までに、<ruby>私<rt>わたし</rt></ruby>の机に<ruby>持<rt>も</rt></ruby>ってきなさい。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>仕事机<rt>しごとづくえ</rt></ruby>に<ruby>座<rt>すわ</rt></ruby>った。<ruby>仕事<rt>しごと</rt></ruby>が<ruby>難<rt>むずか</rt></ruby>しそうだと<ruby>分<rt>わ</rt></ruby>かり、<ruby>佐藤<rt>さとう</rt></ruby>さんに<ruby>書類<rt>しょるい</rt></ruby>を<ruby>見<rt>み</rt></ruby>てもらうよう<ruby>頼<rt>たの</rt></ruby>んだ。<ruby>佐藤<rt>さとう</rt></ruby>さんは<ruby>親切<rt>しんせつ</rt></ruby>にも、それを<ruby>引<rt>ひ</rt></ruby>き<ruby>受<rt>う</rt></ruby>けてくれた。</p>
+  <p>「また、あの<ruby>仕事<rt>しごと</rt></ruby>をやり<ruby>直<rt>なお</rt></ruby>すのは<ruby>嫌<rt>いや</rt></ruby>だな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>思<rt>おも</rt></ruby>った。「このプロジェクトを<ruby>定時内<rt>ていじない</rt></ruby>に<ruby>出<rt>だ</rt></ruby>せれば、チーム<ruby>全員<rt>ぜんいん</rt></ruby>にボーナスが出るらしい。だから、<ruby>提出<rt>ていしゅつ</rt></ruby><ruby>前<rt>まえ</rt></ruby>に<ruby>一<rt>ひと</rt></ruby>つ<ruby>一<rt>ひと</rt></ruby>つ<ruby>丁寧<rt>ていねい</rt></ruby>に<ruby>確認<rt>かくにん</rt></ruby>することにしたんだ。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>集中<rt>しゅうちゅう</rt></ruby>して<ruby>働<rt>はたら</rt></ruby>いた。パソコンで<ruby>文書<rt>ぶんしょ</rt></ruby>を<ruby>打<rt>う</rt></ruby>ちながら、<ruby>上司<rt>じょうし</rt></ruby>の<ruby>指示<rt>しじ</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いていた。12<ruby>時<rt>じ</rt></ruby>までに、<ruby>新<rt>あたら</rt></ruby>しい<ruby>報告書<rt>ほうこくしょ</rt></ruby>は<ruby>完全<rt>かんぜん</rt></ruby>に<ruby>完成<rt>かんせい</rt></ruby>し、<ruby>山田<rt>やまだ</rt></ruby>さんの机の<ruby>上<rt>うえ</rt></ruby>に<ruby>置<rt>お</rt></ruby>かれていた。</p>
+  <p><ruby>山田<rt>やまだ</rt></ruby>さんは<ruby>報告書<rt>ほうこくしょ</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、うなずきながら<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「よくできたな、<ruby>田中<rt>たなか</rt></ruby>。<ruby>頑張<rt>がんば</rt></ruby>ったようだ。これからもこの<ruby>調子<rt>ちょうし</rt></ruby>なら、<ruby>来年<rt>らいねん</rt></ruby>、<ruby>昇進<rt>しょうしん</rt></ruby>できるかもしれんぞ。」</p>
+  <p class="dialogue">「お<ruby>言葉<rt>ことば</rt></ruby>ありがとうございます!」と<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>安堵<rt>あんど</rt>のため<ruby>息<rt>いき</rt></ruby>をつきながら<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p>「<ruby>今日<rt>きょう</rt></ruby>の<ruby>上司<rt>じょうし</rt></ruby>は<ruby>厳<rt>きび</rt></ruby>しかったな。」と<ruby>田中<rt>たなか</rt></ruby>さんは机に<ruby>戻<rt>もど</rt></ruby>りながら<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>頑張<rt>がんば</rt></ruby>れば、<ruby>会社<rt>かいしゃ</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>もきっと<ruby>良<rt>よ</rt></ruby>くなる。<ruby>時間<rt>じかん</rt></ruby>を<ruby>大切<rt>たいせつ</rt></ruby>にして、<ruby>同僚<rt>どうりょう</rt></ruby>を<ruby>待<rt>ま</rt></ruby>たせないようにしよう。」</p>
+</section>
+
+</article>
+
+<!-- ================================================== -->
+<!-- СЕССИЯ 2: Главы 4-6 -->
+<!-- ================================================== -->
+<article class="session" data-session="2">
+<h2>Сессия 2 — Ланч, звонок, 市役所<span class="session-sub">Главы 4・5・6 · ~10 мин чтения</span></h2>
+
+<section class="chapter" data-chapter="4">
+  <h3><span class="ch-num">第4章</span> ランチタイム</h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>午後一時<rt>ごごいちじ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんと<ruby>二人<rt>ふたり</rt></ruby>の<ruby>同僚<rt>どうりょう</rt></ruby>、<ruby>佐藤<rt>さとう</rt></ruby>さんと<ruby>鈴木<rt>すずき</rt></ruby>さんは、<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>昼ご飯<rt>ひるごはん</rt></ruby>を<ruby>食<rt>た</rt></ruby>べに<ruby>行<rt>い</rt></ruby>くことにした。</p>
+  <p class="dialogue">「<ruby>角<rt>かど</rt></ruby>にある<ruby>新<rt>あたら</rt></ruby>しいカフェへ<ruby>行<rt>い</rt></ruby>かない?」と<ruby>鈴木<rt>すずき</rt></ruby>さんが<ruby>提案<rt>ていあん</rt></ruby>した。「あそこのラーメンは、<ruby>町<rt>まち</rt></ruby>で<ruby>一番<rt>いちばん</rt></ruby>おいしいらしいよ。」</p>
+  <p class="dialogue">「いいね!」と<ruby>佐藤<rt>さとう</rt></ruby>さんが<ruby>賛成<rt>さんせい</rt></ruby>した。「もしあそこへ<ruby>行<rt>い</rt></ruby>くなら、<ruby>急<rt>いそ</rt></ruby>いだ<ruby>方<rt>ほう</rt></ruby>が<ruby>良<rt>よ</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>う。<ruby>昼休<rt>ひるやす</rt></ruby>みは<ruby>一時間<rt>いちじかん</rt></ruby>しかないから。」</p>
+  <p class="dialogue">「もし<ruby>遅<rt>おく</rt></ruby>れたら、<ruby>社内<rt>しゃない</rt></ruby>の<ruby>食堂<rt>しょくどう</rt></ruby>で<ruby>食<rt>た</rt></ruby>べるはめになるよ。」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>付<rt>つ</rt></ruby>け<ruby>加<rt>くわ</rt></ruby>えた。「あそこは、<ruby>君<rt>きみ</rt></ruby>たちも<ruby>知<rt>し</rt></ruby>っている<ruby>通<rt>とお</rt></ruby>り、あまりおいしくないからね。」</p>
+  <p><ruby>三人<rt>さんにん</rt></ruby>は<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、5<ruby>分後<rt>ふんご</rt></ruby>には<ruby>小<rt>ちい</rt></ruby>さなレストランに<ruby>入<rt>はい</rt></ruby>っていた。<ruby>店員<rt>てんいん</rt></ruby>が<ruby>丁寧<rt>ていねい</rt></ruby>に<ruby>入口<rt>いりぐち</rt></ruby>で<ruby>迎<rt>むか</rt></ruby>えてくれて、<ruby>空<rt>あ</rt></ruby>いている<ruby>席<rt>せき</rt></ruby>へ<ruby>案内<rt>あんない</rt></ruby>してくれた。</p>
+  <p>それぞれが<ruby>注文<rt>ちゅうもん</rt></ruby>した。</p>
+  <p><ruby>鈴木<rt>すずき</rt></ruby>さんは、<ruby>熱<rt>あつ</rt></ruby>いラーメンと<ruby>冷<rt>つめ</rt></ruby>たいビールを<ruby>注文<rt>ちゅうもん</rt></ruby>した。</p>
+  <p><ruby>佐藤<rt>さとう</rt></ruby>さんは、<ruby>辛<rt>から</rt></ruby>いカレーと<ruby>野菜<rt>やさい</rt></ruby>と、<ruby>水<rt>みず</rt></ruby>を<ruby>一杯<rt>いっぱい</rt></ruby><ruby>注文<rt>ちゅうもん</rt></ruby>した。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは、ご<ruby>飯<rt>はん</rt></ruby>と<ruby>豚肉<rt>ぶたにく</rt></ruby>と<ruby>牛肉<rt>ぎゅうにく</rt></ruby>と<ruby>鶏肉<rt>とりにく</rt></ruby>と<ruby>果物<rt>くだもの</rt></ruby>が<ruby>付<rt>つ</rt></ruby>いた<ruby>定食<rt>ていしょく</rt></ruby>を<ruby>注文<rt>ちゅうもん</rt></ruby>した。</p>
+  <p><ruby>店員<rt>てんいん</rt></ruby>が<ruby>料理<rt>りょうり</rt></ruby>を<ruby>運<rt>はこ</rt></ruby>んできたら、<ruby>三人<rt>さんにん</rt></ruby><ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「いただきます!」</p>
+  <p><ruby>食事<rt>しょくじ</rt></ruby>は<ruby>信<rt>しん</rt></ruby>じられないほどおいしかった。<ruby>豚肉<rt>ぶたにく</rt></ruby>はジューシーで、カレーは<ruby>辛<rt>から</rt></ruby>くてしょっぱくて、ソースは<ruby>少<rt>すこ</rt></ruby>し<ruby>酸<rt>す</rt></ruby>っぱくて<ruby>苦<rt>にが</rt></ruby>い<ruby>味<rt>あじ</rt></ruby>がした。</p>
+  <p class="dialogue">「このラーメンは、<ruby>先週末<rt>せんしゅうまつ</rt></ruby><ruby>食堂<rt>しょくどう</rt></ruby>で<ruby>食<rt>た</rt></ruby>べたものより、ずっとおいしいね。」と<ruby>鈴木<rt>すずき</rt></ruby>さんが<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「ええ、でも、インド<ruby>料理屋<rt>りょうりや</rt></ruby>の<ruby>程<rt>ほど</rt></ruby><ruby>辛<rt>から</rt></ruby>くはないわ。」と<ruby>佐藤<rt>さとう</rt></ruby>さんが<ruby>付<rt>つ</rt></ruby>け<ruby>加<rt>くわ</rt></ruby>えた。</p>
+  <p class="dialogue">「<ruby>僕<rt>ぼく</rt></ruby>も、3<ruby>年前<rt>ねんまえ</rt></ruby>に<ruby>京都<rt>きょうと</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った<ruby>時<rt>とき</rt></ruby>、<ruby>似<rt>に</rt></ruby>たようなソースを<ruby>食<rt>た</rt></ruby>べたことがあるんだ。」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>話<rt>はな</rt></ruby>した。「もし<ruby>少<rt>すこ</rt></ruby>し<ruby>醤油<rt>しょうゆ</rt></ruby>を<ruby>入<rt>い</rt></ruby>れたら、もっと<ruby>味<rt>あじ</rt></ruby>が<ruby>良<rt>よ</rt></ruby>くなると<ruby>思<rt>おも</rt></ruby>うよ。」</p>
+  <p class="dialogue">「そうだ、<ruby>田中<rt>たなか</rt></ruby>さん。」と<ruby>佐藤<rt>さとう</rt></ruby>さんが<ruby>尋<rt>たず</rt></ruby>ねた。「<ruby>山田<rt>やまだ</rt></ruby>さんとの<ruby>話<rt>はなし</rt></ruby>で、<ruby>疲<rt>つか</rt></ruby>れたでしょう?<ruby>報告書<rt>ほうこくしょ</rt></ruby>、<ruby>書<rt>か</rt></ruby>き<ruby>直<rt>なお</rt></ruby>したそうですね。」</p>
+  <p class="dialogue">「ええ、<ruby>大変<rt>たいへん</rt></ruby>だったよ。」と<ruby>田中<rt>たなか</rt></ruby>さんはため<ruby>息<rt>いき</rt></ruby>をついた。「でも、<ruby>君<rt>きみ</rt></ruby>のおかげで<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>った。<ruby>君<rt>きみ</rt></ruby>がいなかったら、<ruby>締<rt>し</rt></ruby>め<ruby>切<rt>き</rt></ruby>りに<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>わなかったかもしれない。」</p>
+  <p><ruby>仕事<rt>しごと</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>や、<ruby>週末<rt>しゅうまつ</rt></ruby>の<ruby>予定<rt>よてい</rt></ruby>、<ruby>天気<rt>てんき</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>で、<ruby>楽<rt>たの</rt></ruby>しくおしゃべりをした。<ruby>食事<rt>しょくじ</rt></ruby>を<ruby>終<rt>お</rt></ruby>えた<ruby>時<rt>とき</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>完全<rt>かんぜん</rt></ruby>に<ruby>元気<rt>げんき</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>戻<rt>もど</rt></ruby>していた。</p>
+  <p class="dialogue">「ああ、<ruby>お腹<rt>おなか</rt></ruby>いっぱいだ!<ruby>美味<rt>おい</rt></ruby>しかった!ごちそうさま!」と<ruby>言<rt>い</rt></ruby>いながら、<ruby>箸<rt>はし</rt></ruby>を<ruby>置<rt>お</rt></ruby>いた。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは、クレジットカードで<ruby>割引<rt>わりびき</rt></ruby><ruby>券<rt>けん</rt></ruby>を<ruby>使<rt>つか</rt></ruby>って、みんな<ruby>分<rt>ぶん</rt></ruby>のお<ruby>会計<rt>かいけい</rt></ruby>を<ruby>払<rt>はら</rt></ruby>った。<ruby>店員<rt>てんいん</rt></ruby>はレシートを<ruby>渡<rt>わた</rt></ruby>して、<ruby>来店<rt>らいてん</rt></ruby>ありがとうございましたと<ruby>言<rt>い</rt></ruby>った。</p>
+  <p>「おいしいものを<ruby>食<rt>た</rt></ruby>べたな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>店<rt>みせ</rt></ruby>を<ruby>出<rt>で</rt></ruby>ながら<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>昼休<rt>ひるやす</rt></ruby>みはあっというまだ。<ruby>時間内<rt>じかんない</rt></ruby>にオフィスに<ruby>戻<rt>もど</rt></ruby>らないと。」</p>
+</section>
+
+<section class="chapter" data-chapter="5">
+  <h3><span class="ch-num">第5章</span> <ruby>大切<rt>たいせつ</rt></ruby>な<ruby>電話<rt>でんわ</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p>カフェを<ruby>出<rt>で</rt></ruby>ると、<ruby>田中<rt>たなか</rt></ruby>さんはポケットの<ruby>中<rt>なか</rt></ruby>で<ruby>携帯電話<rt>けいたいでんわ</rt></ruby>が<ruby>鳴<rt>な</rt></ruby>っているのを<ruby>感<rt>かん</rt></ruby>じた。<ruby>画面<rt>がめん</rt></ruby>には、<ruby>姉<rt>あね</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>が<ruby>表示<rt>ひょうじ</rt></ruby>されていた。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>電話<rt>でんわ</rt></ruby>に<ruby>出<rt>で</rt></ruby>た。</p>
+  <p class="dialogue">「もしもし!<ruby>お姉<rt>おねえ</rt></ruby>さん、こんにちは!」</p>
+  <p class="dialogue">「もしもし、<ruby>田中<rt>たなか</rt></ruby>!お<ruby>元気<rt>げんき</rt></ruby>?<ruby>仕事<rt>しごと</rt></ruby>はどう?」</p>
+  <p class="dialogue">「おかげさまで、みんな<ruby>元気<rt>げんき</rt></ruby>だよ!<ruby>今<rt>いま</rt></ruby>、<ruby>同僚<rt>どうりょう</rt></ruby>と<ruby>昼ご飯<rt>ひるごはん</rt></ruby>を<ruby>終<rt>お</rt></ruby>えたところ。<ruby>君<rt>きみ</rt></ruby>はどう?<ruby>両親<rt>りょうしん</rt></ruby>は<ruby>元気<rt>げんき</rt></ruby>?」</p>
+  <p class="dialogue">「うちもみんな<ruby>元気<rt>げんき</rt></ruby>!<ruby>電話<rt>でんわ</rt></ruby>したのは、<ruby>来週<rt>らいしゅう</rt></ruby>、<ruby>父<rt>ちち</rt></ruby>と<ruby>母<rt>はは</rt></ruby>が<ruby>東京<rt>とうきょう</rt></ruby>へ<ruby>来<rt>く</rt></ruby>るってこと。<ruby>大<rt>おお</rt></ruby>きな<ruby>家族夕食会<rt>かぞくゆうしょくかい</rt></ruby>をしようって<ruby>話<rt>はなし</rt></ruby>なの。ゆみさんと<ruby>健太<rt>けんた</rt></ruby>も<ruby>来<rt>こ</rt></ruby>られる?」</p>
+  <p class="dialogue">「もちろん!<ruby>金曜日<rt>きんようび</rt></ruby>に<ruby>休<rt>やす</rt></ruby>みを<ruby>取<rt>と</rt></ruby>るつもりだから。ちょっと<ruby>待<rt>ま</rt></ruby>って、ゆみに<ruby>詳細<rt>しょうさい</rt></ruby>を<ruby>確認<rt>かくにん</rt></ruby>して、<ruby>今夜<rt>こんや</rt></ruby>また<ruby>電話<rt>でんわ</rt></ruby>するね。」</p>
+  <p class="dialogue">「わかった!<ruby>無理<rt>むり</rt></ruby>しないで、<ruby>体<rt>からだ</rt></ruby>に<ruby>気<rt>き</rt></ruby>をつけてね。」</p>
+  <p class="dialogue">「ありがとう!じゃあ、また<ruby>連絡<rt>れんらく</rt></ruby>するね。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>電話<rt>でんわ</rt></ruby>をポケットに<ruby>入<rt>い</rt></ruby>れた。<ruby>姉<rt>あね</rt></ruby>との<ruby>話<rt>はなし</rt></ruby>で、<ruby>気分<rt>きぶん</rt></ruby>が<ruby>良<rt>よ</rt></ruby>くなった。それから、ゆみさんに<ruby>短<rt>みじか</rt></ruby>いメールを<ruby>送<rt>おく</rt></ruby>った。「<ruby>今日<rt>きょう</rt></ruby>は<ruby>少<rt>すこ</rt></ruby>し<ruby>遅<rt>おく</rt></ruby>くなる。<ruby>心配<rt>しんぱい</rt></ruby>しないで。もし<ruby>早<rt>はや</rt></ruby>く<ruby>終<rt>お</rt></ruby>わったら、<ruby>絶対<rt>ぜったい</rt></ruby>にお<ruby>菓子<rt>かし</rt></ruby>を<ruby>買<rt>か</rt></ruby>って<ruby>帰<rt>かえ</rt></ruby>るよ。」ゆみさんはすぐに、<ruby>笑顔<rt>えがお</rt></ruby>のマークと「わかった、<ruby>家<rt>いえ</rt></ruby>で<ruby>待<rt>ま</rt></ruby>ってる。<ruby>気<rt>き</rt></ruby>をつけて!」と<ruby>返事<rt>へんじ</rt></ruby>をくれた。</p>
+  <p>しかし、<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>歯医者<rt>はいしゃ</rt></ruby>に<ruby>予約<rt>よやく</rt></ruby>をしたいのを<ruby>思<rt>おも</rt></ruby>い<ruby>出<rt>だ</rt></ruby>した。2<ruby>週間<rt>しゅうかん</rt></ruby>も<ruby>歯<rt>は</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>くて、だんだん<ruby>痛<rt>いた</rt></ruby>みが<ruby>強<rt>つよ</rt></ruby>くなっていたからだ。</p>
+  <p>クリニックの<ruby>番号<rt>ばんごう</rt></ruby>を<ruby>押<rt>お</rt></ruby>した。</p>
+  <p class="dialogue">「もしもし、こちらは『<ruby>桜<rt>さくら</rt></ruby><ruby>歯科<rt>しか</rt></ruby><ruby>医院<rt>いいん</rt></ruby>』です。いかがなさいましたか。」と<ruby>受付<rt>うけつけ</rt></ruby>の<ruby>人<rt>ひと</rt></ruby>が<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p class="dialogue">「こんにちは。<ruby>田中<rt>たなか</rt></ruby>と<ruby>申<rt>もう</rt></ruby>します。もしよろしければ、<ruby>診察<rt>しんさつ</rt></ruby>の<ruby>予約<rt>よやく</rt></ruby>をお<ruby>願<rt>ねが</rt></ruby>いしたいのですが。2<ruby>週間<rt>しゅうかん</rt></ruby>ほど<ruby>前<rt>まえ</rt></ruby>から<ruby>歯<rt>は</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>くて、だんだんひどくなっているようで。」</p>
+  <p class="dialogue">「かしこまりました。<ruby>残念<rt>ざんねん</rt></ruby>ながら、<ruby>今日<rt>きょう</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>は<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>予約<rt>よやく</rt></ruby>で<ruby>埋<rt>う</rt></ruby>まっております。よろしければ、<ruby>明日<rt>あした</rt></ruby>の<ruby>夕方六時<rt>ゆうがたろくじ</rt></ruby>はいかがでしょうか。」</p>
+  <p class="dialogue">「はい、<ruby>明日<rt>あした</rt></ruby>の6<ruby>時<rt>じ</rt></ruby>で<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>です。<ruby>必<rt>かなら</rt></ruby>ず<ruby>行<rt>い</rt></ruby>きます。」</p>
+  <p class="dialogue">「では、<ruby>明日<rt>あした</rt></ruby>お<ruby>待<rt>ま</rt></ruby>ちしております。<ruby>予約時間<rt>よやくじかん</rt></ruby>の<ruby>十分前<rt>じゅっぷんまえ</rt></ruby>にお<ruby>越<rt>こ</rt></ruby>しください。また、<ruby>保険証<rt>ほけんしょう</rt></ruby>をお<ruby>忘<rt>わす</rt></ruby>れなく。」</p>
+  <p class="dialogue">「ありがとうございます。<ruby>明日<rt>あした</rt></ruby>、よろしくお願いします。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>電話<rt>でんわ</rt></ruby>を<ruby>切<rt>き</rt></ruby>って<ruby>思<rt>おも</rt></ruby>った。「<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>だと<ruby>良<rt>よ</rt></ruby>いけど。もし<ruby>歯<rt>は</rt></ruby>を<ruby>抜<rt>ぬ</rt></ruby>くことになった、もっと<ruby>休<rt>やす</rt></ruby>みを<ruby>取<rt>と</rt></ruby>らなきゃいけないかもしれないな。」</p>
+  <p>「<ruby>家族<rt>かぞく</rt></ruby>がもうすぐ<ruby>来<rt>く</rt></ruby>るな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>思<rt>おも</rt></ruby>った。「<ruby>準備<rt>じゅんび</rt></ruby>する<ruby>時間<rt>じかん</rt></ruby>を<ruby>見<rt>み</rt></ruby>つけないと。<ruby>仕事<rt>しごと</rt></ruby>が、<ruby>親戚<rt>しんせき</rt></ruby>との<ruby>面会<rt>めんかい</rt></ruby>を<ruby>邪魔<rt>じゃま</rt></ruby>しないと<ruby>良<rt>よ</rt></ruby>いけど。」</p>
+</section>
+
+<section class="chapter" data-chapter="6">
+  <h3><span class="ch-num">第6章</span> <ruby>市役所<rt>しゃくしょ</rt></ruby>と<ruby>体調<rt>たいちょう</rt></ruby>の<ruby>変化<rt>へんか</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>昼ご飯<rt>ひるごはん</rt></ruby>の<ruby>後<rt>あと</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>急<rt>きゅう</rt></ruby>に<ruby>市役所<rt>しゃくしょ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>かなければならなくなった。<ruby>住民票<rt>じゅうみんひょう</rt></ruby>の<ruby>証明書<rt>しょうめいしょ</rt></ruby>が<ruby>必要<rt>ひつよう</rt></ruby>だったからだ。<ruby>上司<rt>じょうし</rt></ruby>は<ruby>一時間<rt>いちじかん</rt></ruby>だけ<ruby>外<rt>そと</rt></ruby>しても<ruby>良<rt>い</rt></ruby>いと<ruby>許可<rt>きょか</rt></ruby>してくれたが、3<ruby>時<rt>じ</rt></ruby>までに<ruby>戻<rt>もど</rt></ruby>るように<ruby>言<rt>い</rt></ruby>われた。</p>
+  <p><ruby>市役所<rt>しゃくしょ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>はとても<ruby>混雑<rt>こんざつ</rt></ruby>していた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>番号札<rt>ばんごうふだ</rt></ruby>を<ruby>取<rt>と</rt></ruby>って、<ruby>壁<rt>かべ</rt></ruby>に<ruby>貼<rt>は</rt></ruby>ってある<ruby>説明<rt>せつめい</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みながら<ruby>順番<rt>じゅんばん</rt></ruby>を<ruby>待<rt>ま</rt></ruby>った。<ruby>呼<rt>よ</rt></ruby>ばれると、<ruby>窓口<rt>まどぐち</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「こんにちは。<ruby>田中<rt>たなか</rt></ruby>と<ruby>申<rt>もう</rt></ruby>します。<ruby>住民票<rt>じゅうみんひょう</rt></ruby>の<ruby>証明書<rt>しょうめいしょ</rt></ruby>を<ruby>取<rt>と</rt></ruby>りたいのですが、どんな<ruby>書類<rt>しょるい</rt></ruby>が<ruby>必要<rt>ひつよう</rt></ruby>でしょうか。」</p>
+  <p class="dialogue">「こんにちは。<ruby>証明書<rt>しょうめいしょ</rt></ruby>を<ruby>取<rt>と</rt></ruby>るには、<ruby>身分証明書<rt>みぶんしょうめいしょ</rt></ruby>と、<ruby>手数料<rt>てすうりょう</rt></ruby>を<ruby>払<rt>はら</rt></ruby>った<ruby>証明<rt>しょうめい</rt></ruby>が<ruby>必要<rt>ひつよう</rt></ruby>です。この<ruby>用紙<rt>ようし</rt></ruby>に<ruby>記入<rt>きにゅう</rt></ruby>して、<ruby>入口<rt>いりぐち</rt></ruby>の<ruby>自動販売機<rt>じどうはんばいき</rt></ruby>で<ruby>支払<rt>しはら</rt></ruby>いをお<ruby>願<rt>ねが</rt></ruby>いします。」</p>
+  <p class="dialogue">「わかりました。<ruby>手続<rt>てつづ</rt></ruby>きにはどのくらいの<ruby>時間<rt>じかん</rt></ruby>がかかりますか。」</p>
+  <p class="dialogue">「<ruby>通常<rt>つうじょう</rt></ruby>、20<ruby>分<rt>ぷん</rt></ruby>くらいです。しかし、<ruby>今日<rt>きょう</rt></ruby>は<ruby>お客様<rt>おきゃくさま</rt></ruby>が<ruby>多<rt>おお</rt></ruby>いので、もう<ruby>少<rt>すこ</rt></ruby>しかかるかもしれません。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>用紙<rt>ようし</rt></ruby>に<ruby>記入<rt>きにゅう</rt></ruby>して、<ruby>手数料<rt>てすうりょう</rt></ruby>を<ruby>払<rt>はら</rt></ruby>い、<ruby>証明書<rt>しょうめいしょ</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>取<rt>と</rt></ruby>って、<ruby>係員<rt>かかりいん</rt></ruby>に<ruby>礼<rt>れい</rt></ruby>を<ruby>言<rt>い</rt></ruby>った。<ruby>壁<rt>かべ</rt></ruby>には「<ruby>携帯電話<rt>けいたいでんわ</rt></ruby>は<ruby>電源<rt>でんげん</rt></ruby>をお<ruby>切<rt>き</rt></ruby>りください。<ruby>窓口<rt>まどぐち</rt></ruby>へ<ruby>行<rt>い</rt></ruby>く<ruby>前<rt>まえ</rt></ruby>に、<ruby>用紙<rt>ようし</rt></ruby>を<ruby>記入<rt>きにゅう</rt></ruby>してください。<ruby>質問<rt>しつもん</rt></ruby>があれば、<ruby>案内所<rt>あんないじょ</rt></ruby>へお<ruby>越<rt>こ</rt></ruby>しください。」という<ruby>張<rt>は</rt></ruby>り<ruby>紙<rt>がみ</rt></ruby>がしてあった。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>急<rt>いそ</rt></ruby>いで<ruby>会社<rt>かいしゃ</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>った。</p>
+  <p><ruby>仕事場<rt>しごとば</rt></ruby>に<ruby>戻<rt>もど</rt></ruby>ると、<ruby>明日<rt>あした</rt></ruby>のプレゼンの<ruby>準備<rt>じゅんび</rt></ruby>を<ruby>続<rt>つづ</rt></ruby>けた。<ruby>働<rt>はたら</rt></ruby>いているうちに、<ruby>朝<rt>あさ</rt></ruby>より<ruby>頭<rt>あたま</rt></ruby>がずっと<ruby>痛<rt>いた</rt></ruby>くなっていることに<ruby>気<rt>き</rt></ruby>づいた。「<ruby>疲<rt>つか</rt></ruby>れすぎたみたいだな。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>思<rt>おも</rt></ruby>った。「このままじゃ、<ruby>明日<rt>あした</rt></ruby>ちゃんとプレゼンできないかもしれない。」</p>
+  <p><ruby>今夜<rt>こんや</rt></ruby>は、<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んで、<ruby>早<rt>はや</rt></ruby>く<ruby>寝<rt>ね</rt></ruby>て、できるだけ<ruby>体調<rt>たいちょう</rt></ruby>を<ruby>回復<rt>かいふく</rt></ruby>させようと<ruby>決<rt>き</rt></ruby>めた。</p>
+  <p>「<ruby>証明書<rt>しょうめいしょ</rt></ruby>はもらった。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>市役所<rt>しゃくしょ</rt></ruby>を<ruby>出<rt>で</rt></ruby>ながら<ruby>思<rt>おも</rt></ruby>った。「<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>戻<rt>もど</rt></ruby>らないと。もし<ruby>遅刻<rt>ちこく</rt></ruby>したら、<ruby>上司<rt>じょうし</rt></ruby>また<ruby>怒<rt>おこ</rt></ruby>るだろうな。」</p>
+</section>
+
+</article>
+
+<!-- ================================================== -->
+<!-- СЕССИЯ 3: Главы 7-9 -->
+<!-- ================================================== -->
+<article class="session" data-session="3">
+<h2>Сессия 3 — Покупки, дом, утро<span class="session-sub">Главы 7・8・9 · ~10 мин чтения</span></h2>
+
+<section class="chapter" data-chapter="7">
+  <h3><span class="ch-num">第7章</span> <ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>と<ruby>近所<rt>きんじょ</rt></ruby>の<ruby>人<rt>ひと</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>仕事<rt>しごと</rt></ruby>が<ruby>終<rt>お</rt></ruby>わった<ruby>後<rt>あと</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>同僚<rt>どうりょう</rt></ruby>にさよならを<ruby>言<rt>い</rt></ruby>って、<ruby>駅<rt>えき</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くにある<ruby>大<rt>おお</rt></ruby>きなデパートとスーパーへ、<ruby>食料品<rt>しょくりょうひん</rt></ruby>と<ruby>家<rt>いえ</rt></ruby>のものを<ruby>買<rt>か</rt></ruby>いに<ruby>行<rt>い</rt></ruby>った。</p>
+  <p>まず、<ruby>服<rt>ふく</rt></ruby>の<ruby>売<rt>う</rt></ruby>り<ruby>場<rt>ば</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った。<ruby>妻<rt>つま</rt></ruby>へのプレゼントと、<ruby>自分<rt>じぶん</rt></ruby>のワードローブを<ruby>更新<rt>こうしん</rt></ruby>したかった。<ruby>店員<rt>てんいん</rt></ruby>が<ruby>新<rt>あたら</rt></ruby>しいコレクションを<ruby>見<rt>み</rt></ruby>せてくれた。</p>
+  <p class="dialogue">「いらっしゃいませ。<ruby>何<rt>なに</rt></ruby>か<ruby>試着<rt>しちゃく</rt></ruby>されますか。」</p>
+  <p class="dialogue">「こんにちは。この<ruby>青<rt>あお</rt></ruby>いシャツを<ruby>試着<rt>しちゃく</rt></ruby>したいのですが、<ruby>私<rt>わたし</rt></ruby>に<ruby>合<rt>あ</rt></ruby>うかどうか<ruby>見<rt>み</rt></ruby>てみたいんです。それから、<ruby>緑<rt>みどり</rt></ruby>のセーターと、<ruby>妻<rt>つま</rt></ruby><ruby>用<rt>よう</rt></ruby>のオレンジのワンピース、<ruby>紫<rt>むらさき</rt></ruby>のマフラー、<ruby>子供<rt>こども</rt></ruby><ruby>用<rt>よう</rt></ruby>のピンクの<ruby>帽子<rt>ぼうし</rt></ruby>も<ruby>欲<rt>ほ</rt></ruby>しいんです。」</p>
+  <p class="dialogue">「<ruby>素敵<rt>すてき</rt></ruby>なお<ruby>選<rt>えら</rt></ruby>びですね。はい、こちらのシャツをどうぞ。ちなみに、<ruby>今<rt>いま</rt></ruby>なら2<ruby>点目<rt>てんめ</rt></ruby>が2<ruby>割<rt>わり</rt></ruby><ruby>引<rt>び</rt></ruby>きですよ。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>試着室<rt>しちゃくしつ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>って、<ruby>鏡<rt>かがみ</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>にシャツを<ruby>着<rt>き</rt></ruby>た。ぴったりだった。</p>
+  <p class="dialogue">「このシャツと、<ruby>茶色<rt>ちゃいろ</rt></ruby>い<ruby>上着<rt>うわぎ</rt></ruby>と<ruby>黒<rt>くろ</rt></ruby>いズボンは、いくらですか。」と<ruby>尋<rt>たず</rt></ruby>ねた。</p>
+  <p class="dialogue">「シャツは5000<ruby>円<rt>えん</rt></ruby>、ズボンは8000<ruby>円<rt>えん</rt></ruby>です。<ruby>今日<rt>きょう</rt></ruby>はセールなので、2<ruby>点目<rt>てんめ</rt></ruby>が2<ruby>割<rt>わり</rt></ruby><ruby>引<rt>び</rt></ruby>きです。」</p>
+  <p class="dialogue">「それは<ruby>素晴らしい<rt>すばら</rt></ruby>!じゃあ、<ruby>買<rt>か</rt></ruby>うことにします。ワンピースと<ruby>帽子<rt>ぼうし</rt></ruby>を、あらかじめギフト<ruby>用<rt>よう</rt></ruby>の<ruby>袋<rt>ふくろ</rt></ruby>に<ruby>入<rt>い</rt></ruby>れてもらえますか。」</p>
+  <p class="dialogue">「かしこまりました。<ruby>今<rt>いま</rt></ruby>、お<ruby>包<rt>つつ</rt></ruby>みします。」</p>
+  <p>クレジットカードで<ruby>支払<rt>しはら</rt></ruby>って、レシートをもらったら、<ruby>田中<rt>たなか</rt></ruby>さんは1<ruby>階<rt>かい</rt></ruby>の<ruby>食品<rt>しょくひん</rt></ruby>スーパーへ<ruby>降<rt>お</rt></ruby>りた。カゴを<ruby>取<rt>と</rt></ruby>って、<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>を<ruby>始<rt>はじ</rt></ruby>めた。</p>
+  <p><ruby>赤<rt>あか</rt></ruby>いりんごと、<ruby>黄色<rt>きいろ</rt></ruby>い<ruby>梨<rt>なし</rt></ruby>と、<ruby>甘<rt>あま</rt></ruby>いみかんを<ruby>買<rt>か</rt></ruby>った。</p>
+  <p><ruby>長<rt>なが</rt></ruby>いバナナを<ruby>取<rt>と</rt></ruby>った。</p>
+  <p><ruby>新鮮<rt>しんせん</rt></ruby>な<ruby>魚<rt>さかな</rt></ruby>と、<ruby>牛肉<rt>ぎゅうにく</rt></ruby>と、<ruby>豚肉<rt>ぶたにく</rt></ruby>と、<ruby>鶏肉<rt>とりにく</rt></ruby>をカゴに<ruby>入<rt>い</rt></ruby>れた。</p>
+  <p><ruby>牛乳<rt>ぎゅうにゅう</rt></ruby>と、ワインと、<ruby>新鮮<rt>しんせん</rt></ruby>な<ruby>卵<rt>たまご</rt></ruby>のパックと、<ruby>緑茶<rt>りょくちゃ</rt></ruby>を<ruby>取<rt>と</rt></ruby>った。</p>
+  <p><ruby>全部<rt>ぜんぶ</rt></ruby>の<ruby>食品<rt>しょくひん</rt></ruby>を<ruby>丁寧<rt>ていねい</rt></ruby>にカゴに<ruby>入<rt>い</rt></ruby>れて、レジへ<ruby>向<rt>む</rt></ruby>かった。</p>
+  <p class="dialogue">「<ruby>袋<rt>ふくろ</rt></ruby>はご利用ですか。」と<ruby>店員<rt>てんいん</rt></ruby>が<ruby>尋<rt>たず</rt></ruby>ねた。</p>
+  <p class="dialogue">「はい、お<ruby>願<rt>ねが</rt></ruby>いします。<ruby>大<rt>おお</rt></ruby>きい<ruby>袋<rt>ふくろ</rt></ruby>を<ruby>一<rt>ひと</rt></ruby>つ。」</p>
+  <p class="dialogue">「<ruby>現金<rt>げんきん</rt></ruby>ですか、それともカードですか。」</p>
+  <p class="dialogue">「カードで。ありがとう。」</p>
+  <p><ruby>店員<rt>てんいん</rt></ruby>は<ruby>商品<rt>しょうひん</rt></ruby>をスキャンして、<ruby>袋<rt>ふくろ</rt></ruby>に<ruby>入<rt>い</rt></ruby>れ、レシートを<ruby>渡<rt>わた</rt></ruby>した。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>重<rt>おも</rt></ruby>い<ruby>袋<rt>ふくろ</rt></ruby>を<ruby>持<rt>も</rt></ruby>って、<ruby>出口<rt>でぐち</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。ドアのところ<ruby>丁度<rt>ちょうど</rt></ruby>、<ruby>仕事<rt>しごと</rt></ruby>から<ruby>帰<rt>かえ</rt></ruby>ってきた<ruby>近所<rt>きんじょ</rt></ruby>の<ruby>小林<rt>こばやし</rt></ruby>さんに<ruby>会<rt>あ</rt></ruby>った。</p>
+  <p class="dialogue">「こんばんは、<ruby>小林<rt>こばやし</rt></ruby>さん!」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>挨拶<rt>あいさつ</rt></ruby>した。</p>
+  <p class="dialogue">「ああ、<ruby>田中<rt>たなか</rt></ruby>さん!こんばんは!たくさん<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>をしたんですね。<ruby>今日<rt>きょう</rt></ruby>はお<ruby>奥<rt>おく</rt></ruby>さんの<ruby>誕生日<rt>たんじょうび</rt></ruby>ですか。」</p>
+  <p class="dialogue">「いいえ、<ruby>夕食<rt>ゆうしょく</rt></ruby>の<ruby>材料<rt>ざいりょう</rt></ruby>を<ruby>買<rt>か</rt></ruby>っただけです。ところで<ruby>小林<rt>こばやし</rt></ruby>さん、もし<ruby>明日<rt>あした</rt></ruby><ruby>私<rt>わたし</rt></ruby>が<ruby>遅<rt>おく</rt></ruby>く<ruby>帰<rt>かえ</rt></ruby>ったら、<ruby>妻<rt>つま</rt></ruby>にこの<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>渡<rt>わた</rt></ruby>していただけませんか。<ruby>彼女<rt>かのじょ</rt></ruby>は、6<ruby>時<rt>じ</rt></ruby>にはきっと<ruby>家<rt>いえ</rt></ruby>にいると<ruby>思<rt>おも</rt></ruby>います。」</p>
+  <p class="dialogue">「もちろん、かまいませんよ。<ruby>私<rt>わたし</rt></ruby>も<ruby>大体<rt>だいたい</rt></ruby>その<ruby>時間<rt>じかん</rt></ruby>には<ruby>家<rt>いえ</rt></ruby>にいますから。」</p>
+  <p class="dialogue">「ありがとうございます!とても<ruby>助<rt>たす</rt></ruby>かります。」</p>
+  <p>「<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>は<ruby>終<rt>お</rt></ruby>わった。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>店<rt>みせ</rt></ruby>を<ruby>出<rt>で</rt></ruby>ながら<ruby>思<rt>おも</rt></ruby>った。「そろそろ<ruby>帰<rt>かえ</rt></ruby>ろう。<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>遅<rt>おく</rt></ruby>れなければ、すぐ<ruby>家<rt>いえ</rt></ruby>に<ruby>着<rt>つ</rt></ruby>くはずだ。」</p>
+</section>
+
+<section class="chapter" data-chapter="8">
+  <h3><span class="ch-num">第8章</span> <ruby>帰宅<rt>きたく</rt></ruby>と<ruby>家族<rt>かぞく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>夕方<rt>ゆうがた</rt></ruby>には<ruby>雨<rt>あめ</rt></ruby>は<ruby>止<rt>と</rt></ruby>んでいたが、<ruby>外<rt>そと</rt></ruby>は<ruby>涼<rt>すず</rt></ruby>しくなっていた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>地下鉄<rt>ちかてつ</rt></ruby>で<ruby>自宅<rt>じたく</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>まで<ruby>行<rt>い</rt></ruby>き、<ruby>降<rt>お</rt></ruby>りて、タクシーを<ruby>使<rt>つか</rt></ruby>うことにした。<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>の<ruby>袋<rt>ふくろ</rt></ruby>が<ruby>重<rt>おも</rt></ruby>かったからだ。</p>
+  <p>15<ruby>分後<rt>ふんご</rt></ruby>、タクシーは<ruby>家<rt>いえ</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に<ruby>着<rt>つ</rt></ruby>いた。<ruby>駐車場<rt>ちゅうしゃじょう</rt></ruby>には、<ruby>柔<rt>やわ</rt></ruby>らかい<ruby>明<rt>あか</rt></ruby>るさがついていた。<ruby>田中<rt>たなか</rt></ruby>さんはドアに<ruby>近<rt>ちか</rt></ruby>づき、<ruby>開<rt>あ</rt></ruby>けて、<ruby>玄関<rt>げんかん</rt></ruby>に<ruby>入<rt>はい</rt></ruby>った。</p>
+  <p class="dialogue">「ただいま!」と<ruby>大<rt>おお</rt></ruby>きな<ruby>声<rt>こえ</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「お<ruby>帰<rt>かえ</rt></ruby>りなさい!こんばんは!」とゆみさんが<ruby>出迎<rt>でむか</rt></ruby>えてくれた。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>靴<rt>くつ</rt></ruby>と<ruby>靴下<rt>くつした</rt></ruby>とコートと<ruby>上着<rt>うわぎ</rt></ruby>を<ruby>脱<rt>ぬ</rt></ruby>いで、<ruby>リビング<rt>りびんぐ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>り、<ruby>手<rt>て</rt></ruby>を<ruby>洗<rt>あら</rt></ruby>った。<ruby>小<rt>ちい</rt></ruby>さな<ruby>健太<rt>けんた</rt></ruby>は、<ruby>父親<rt>ちちおや</rt></ruby>が<ruby>朝<rt>あさ</rt></ruby><ruby>持<rt>も</rt></ruby>ってきたおもちゃで、<ruby>床<rt>ゆか</rt></ruby>の<ruby>絨毯<rt>じゅうたん</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>で<ruby>遊<rt>あそ</rt></ruby>んでいた。</p>
+  <p>ゆみさんは、もう<ruby>台所<rt>だいどころ</rt></ruby>でテーブルを<ruby>準備<rt>じゅんび</rt></ruby>していた。<ruby>夕食<rt>ゆうしょく</rt></ruby>には、<ruby>熱<rt>あつ</rt></ruby>いラーメンと、<ruby>新鮮<rt>しんせん</rt></ruby>な<ruby>野菜<rt>やさい</rt></ruby>のサラダと、<ruby>香<rt>かお</rt></ruby>りの<ruby>良<rt>よ</rt></ruby>いお<ruby>茶<rt>ちゃ</rt></ruby>があった。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>はとても<ruby>忙<rt>いそが</rt></ruby>しくて<ruby>大変<rt>たいへん</rt></ruby>な<ruby>一日<rt>いちにち</rt></ruby>だったけど、<ruby>家族<rt>かぞく</rt></ruby>のところに<ruby>帰<rt>かえ</rt></ruby>って<ruby>来<rt>こ</rt></ruby>られて、<ruby>本当<rt>ほんとう</rt></ruby>に<ruby>嬉<rt>うれ</rt></ruby>しいよ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>笑顔<rt>えがお</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>はよく<ruby>頑張<rt>がんば</rt></ruby>りましたね!ゆっくり<ruby>休<rt>やす</rt></ruby>んで。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。「そうだ、<ruby>お姉<rt>おねえ</rt></ruby>さんから<ruby>電話<rt>でんわ</rt></ruby>があったわ。<ruby>来週<rt>らいしゅう</rt></ruby>、<ruby>両親<rt>りょうしん</rt></ruby>が<ruby>来<rt>く</rt></ruby>るそうよ。もし<ruby>金曜日<rt>きんようび</rt></ruby>に<ruby>暇<rt>ひま</rt></ruby>なら、<ruby>夕食会<rt>ゆうしょくかい</rt></ruby>をしたいって。」</p>
+  <p class="dialogue">「うん、もう<ruby>彼女<rt>かのじょ</rt></ruby>とその<ruby>話<rt>はなし</rt></ruby>をしたよ。できるだけ<ruby>早<rt>はや</rt></ruby>く<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>出<rt>で</rt></ruby>るようにするよ。<ruby>上司<rt>じょうし</rt></ruby>が<ruby>許<rt>ゆる</rt></ruby>してくれたら、<ruby>母<rt>はは</rt></ruby>への<ruby>花<rt>はな</rt></ruby>も<ruby>買<rt>か</rt></ruby>いに<ruby>寄<rt>よ</rt></ruby>れるかもしれない。」</p>
+  <p><ruby>二人<rt>ふたり</rt></ruby>は<ruby>夕食<rt>ゆうしょく</rt></ruby>のテーブルについた。<ruby>リビング<rt>りびんぐ</rt></ruby>に<ruby>置<rt>お</rt></ruby>いてあるテレビでは、<ruby>夜<rt>よる</rt></ruby>のニュースを<ruby>伝<rt>つた</rt></ruby>えていた。<ruby>天気予報士<rt>てんきよほうし</rt></ruby>は、<ruby>明日<rt>あした</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>はまた<ruby>晴<rt>は</rt></ruby>れて<ruby>暖<rt>あたた</rt></ruby>かく、<ruby>週末<rt>しゅうまつ</rt></ruby>には<ruby>気温<rt>きおん</rt></ruby>が<ruby>少<rt>すこ</rt></ruby>し<ruby>下<rt>さ</rt></ruby>がると<ruby>言<rt>い</rt></ruby>っていた。</p>
+  <p class="dialogue">「<ruby>週末<rt>しゅうまつ</rt></ruby>には、やっとこんなに<ruby>暑<rt>あつ</rt></ruby>くなくなるみたいだね。」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「ええ、でも、<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>るかもしれないわ。もし<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>ったら、<ruby>公園<rt>こうえん</rt></ruby>での<ruby>散歩<rt>さんぽ</rt></ruby>はできないかもしれないね。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>夕食<rt>ゆうしょく</rt></ruby>の<ruby>後<rt>あと</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>お風呂場<rt>おふろば</rt></ruby>に<ruby>行<rt>い</rt></ruby>き、お<ruby>湯<rt>ゆ</rt></ruby>を<ruby>張<rt>は</rt></ruby>って、ゆっくりお<ruby>風呂<rt>ふろ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>った。<ruby>一日<rt>いちにち</rt></ruby>の<ruby>疲<rt>つか</rt></ruby>れを<ruby>流<rt>なが</rt></ruby>して、<ruby>部屋着<rt>へやぎ</rt></ruby>に<ruby>着替<rt>きが</rt></ruby>えて、<ruby>寝室<rt>しんしつ</rt></ruby>に<ruby>戻<rt>もど</rt></ruby>った。</p>
+  <p>ゆみさんはもう<ruby>健太<rt>けんた</rt></ruby>を<ruby>寝<rt>ね</rt></ruby>かしつけていた。<ruby>家<rt>いえ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>は<ruby>完全<rt>かんぜん</rt></ruby>に<ruby>静<rt>しず</rt></ruby>かになっていた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>椅子<rt>いす</rt></ruby>に<ruby>座<rt>すわ</rt></ruby>って、<ruby>本<rt>ほん</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>し、<ruby>数<rt>すう</rt></ruby>ページ<ruby>読<rt>よ</rt></ruby>んだ。</p>
+  <p><ruby>寝<rt>ね</rt></ruby>る<ruby>前<rt>まえ</rt></ruby>に、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>窓<rt>まど</rt></ruby>を<ruby>閉<rt>し</rt></ruby>めたか<ruby>確認<rt>かくにん</rt></ruby>し、<ruby>台所<rt>だいどころ</rt></ruby>の<ruby>電気<rt>でんき</rt></ruby>を<ruby>消<rt>け</rt></ruby>し、テーブルの<ruby>上<rt>うえ</rt></ruby>のコップを<ruby>片<rt>かた</rt></ruby>づけ、<ruby>明日<rt>あした</rt></ruby>の<ruby>服<rt>ふく</rt></ruby>を<ruby>準備<rt>じゅんび</rt></ruby>し、<ruby>目覚<rt>めざ</rt></rubyまし<ruby>時計<rt>どけい</rt></ruby>を<ruby>朝六時<rt>あさろくじ</rt></ruby>にセットした。<ruby>夜十一時<rt>よるじゅういちじ</rt></ruby><ruby>頃<rt>ごろ</rt></ruby>、<ruby>リビング<rt>りびんぐ</rt></ruby>の<ruby>電気<rt>でんき</rt></ruby>を<ruby>消<rt>け</rt></ruby>し、<ruby>玄関<rt>げんかん</rt></ruby>のドアがかかって<ruby>いる<rt>いる</rt></ruby>か<ruby>確認<rt>かくにん</rt></ruby>して、<ruby>寝室<rt>しんしつ</rt></ruby>に<ruby>戻<rt>もど</rt></ruby>った。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>は<ruby>良<rt>よ</rt></ruby>い<ruby>一日<rt>いちにち</rt></ruby>だった。<ruby>明日<rt>あした</rt></ruby>はまた<ruby>早<rt>はや</rt></ruby>く<ruby>起<rt>お</rt></ruby>きなきゃ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>静<rt>しず</rt></ruby>かに<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「ええ、<ruby>休<rt>やす</rt></ruby>んで。おやすみなさい。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p class="dialogue">「おやすみ!<ruby>明日<rt>あした</rt></ruby>は、もっと<ruby>良<rt>よ</rt></ruby>い<ruby>一日<rt>いちにち</rt></ruby>になるように<ruby>頑張<rt>がんば</rt></ruby>るよ。」</p>
+  <p>「<ruby>家<rt>いえ</rt></ruby>はいつもこんなに<ruby>良<rt>よ</rt></ruby>いな。」と<ruby>田中<rt>たなか</rt></ruby>さんはベッドに<ruby>入<rt>はい</rt></ruby>りながら<ruby>思<rt>おも</rt></ruby>った。「<ruby>明日<rt>あした</rt></ruby>もまた<ruby>早起<rt>はやお</rt></ruby>きだ。<ruby>良<rt>よ</rt></ruby>く<ruby>眠<rt>ねむ</rt></ruby>って、<ruby>仕事<rt>しごと</rt></ruby>を<ruby>頑張<rt>がんば</rt></ruby>ろう。」</p>
+</section>
+
+<section class="chapter" data-chapter="9">
+  <h3><span class="ch-num">第9章</span> <ruby>翌朝<rt>よくあさ</rt></ruby>の<ruby>決意<rt>けつい</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>翌朝<rt>よくあさ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはいつものように6<ruby>時<rt>じ</rt></ruby>に<ruby>起<rt>お</rt></ruby>きた。<ruby>窓<rt>まど</rt></ruby>の<ruby>外<rt>そと</rt></ruby>では<ruby>太陽<rt>たいよう</rt></ruby>が<ruby>輝<rt>かがや</rt></ruby>いていて、<ruby>昨日<rt>きのう</rt></ruby>よりも<ruby>天気<rt>てんき</rt></ruby>が<ruby>良<rt>よ</rt></ruby>さそうだった。<ruby>彼<rt>かれ</rt></ruby>は<ruby>妻<rt>つま</rt></ruby>を<ruby>起<rt>お</rt></ruby>こさないように、<ruby>静<rt>しず</rt></ruby>かにベッドから<ruby>降<rt>お</rt></ruby>りて、<ruby>台所<rt>だいどころ</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。</p>
+  <p>「<ruby>毎日<rt>まいにち</rt></ruby>、こんなに<ruby>早<rt>はや</rt></ruby>く<ruby>起<rt>お</rt></ruby>きれば。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>思<rt>おも</rt></ruby>った。「<ruby>出社<rt>しゅっしゃ</rt></ruby>する<ruby>前<rt>まえ</rt></ruby>に、もっと<ruby>家族<rt>かぞく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby>を<ruby>作<rt>つく</rt></ruby>れるだろうな。」</p>
+  <p>コーヒーを<ruby>入<rt>い</rt></ruby>れて、<ruby>台所<rt>だいどころ</rt></ruby>のテーブルに<ruby>座<rt>すわ</rt></ruby>りながら、<ruby>今日<rt>きょう</rt></ruby>のやることを<ruby>頭<rt>あたま</rt></ruby>の<ruby>中<rt>なか</rt></ruby>でリストアップした。<ruby>今日<rt>きょう</rt></ruby>は、お<ruby>客様<rt>きゃくさま</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>でプレゼンをする<ruby>予定<rt>よてい</rt></ruby>があり、<ruby>夜<rt>よる</rt></ruby>には<ruby>歯医者<rt>はいしゃ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>くことになっていた。</p>
+  <p>「プレゼンがうまく<ruby>行<rt>い</rt></ruby>くと<ruby>良<rt>よ</rt></ruby>いな。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>独<rt>ひと</rt></ruby>り<ruby>言<rt>ご</rt></ruby>を<ruby>言<rt>い</rt></ruby>った。「もしお<ruby>客様<rt>きゃくさま</rt></ruby>が<ruby>満足<rt>まんぞく</rt></ruby>してくれたら、うちの<ruby>部署<rt>ぶしょ</rt></ruby>は<ruby>大<rt>おお</rt></ruby>きな<ruby>注文<rt>ちゅうもん</rt></ruby>をもらえるかもしれない。そうなれば、<ruby>休暇<rt>きゅうか</rt></ruby>が<ruby>取<rt>と</rt></ruby>れて、<ruby>家族<rt>かぞく</rt></ruby>を<ruby>海<rt>うみ</rt></ruby>へ<ruby>連<rt>つ</rt></ruby>れて<ruby>行<rt>い</rt></ruby>けるかもしれない。」</p>
+  <p>ゆみさんがあくびを<ruby>しながら<rt>しながら</rt></ruby><ruby>台所<rt>だいどころ</rt></ruby>に<ruby>出<rt>で</rt></ruby>てきた。</p>
+  <p class="dialogue">「もう<ruby>起<rt>お</rt></ruby>きてたの?<ruby>今日<rt>きょう</rt></ruby>のプレゼンのこと、すごく<ruby>心配<rt>しんぱい</rt></ruby>してるんでしょう。」</p>
+  <p class="dialogue">「<ruby>少<rt>すこ</rt></ruby>しね。でも、みんなに<ruby>好<rt>す</rt></ruby>きに<ruby>合<rt>あ</rt></ruby>ってもらえるように<ruby>頑張<rt>がんば</rt></ruby>るよ。もし<ruby>緊張<rt>きんちょう</rt></ruby>しすぎたら、<ruby>大事<rt>だいじ</rt></ruby>なことを<ruby>忘<rt>わす</rt></ruby>れちゃうかもしれないから。」</p>
+  <p class="dialogue">「きっとうまく<ruby>行<rt>い</rt></ruby>くわ。そうだ、<ruby>仕事<rt>しごと</rt></ruby>の<ruby>後<rt>あと</rt></ruby>、<ruby>歯医者<rt>はいしゃ</rt></ruby>を<ruby>忘<rt>わす</rt></ruby>れないでね。もし<ruby>歯<rt>は</rt></ruby>がずっと<ruby>痛<rt>いた</rt></ruby>かったら、<ruby>週末<rt>しゅうまつ</rt></ruby>ちゃんと<ruby>休<rt>やす</rt></ruby>めないわよ。」</p>
+  <p class="dialogue">「わかった。<ruby>絶対<rt>ぜったい</rt></ruby>に<ruby>行<rt>い</rt></ruby>くよ。<ruby>教<rt>おし</rt></ruby>えてくれてありがとう。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんはコーヒーを<ruby>飲<rt>の</rt></ruby>み<ruby>終<rt>お</rt></ruby>えて、<ruby>妻<rt>つま</rt></ruby>と<ruby>目<rt>め</rt></ruby>を<ruby>覚<rt>さ</rt></ruby>ました<ruby>息子<rt>むすこ</rt></ruby>に<ruby>接吻<rt>せっぷん</rt></ruby>をして、<ruby>出口<rt>でぐち</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。</p>
+  <p class="dialogue">「<ruby>行<rt>い</rt></ruby>ってきます。<ruby>今夜<rt>こんや</rt></ruby>、<ruby>会<rt>あ</rt></ruby>おうね。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>声<rt>こえ</rt></ruby>を<ruby>上<rt>あ</rt></ruby>げた。</p>
+  <p class="dialogue">「いってらっしゃい!<ruby>気<rt>き</rt></ruby>をつけてね。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>家<rt>いえ</rt></ruby>を<ruby>出<rt>で</rt></ruby>た。<ruby>朝<rt>あさ</rt></ruby>の<ruby>空気<rt>くうき</rt></ruby>は<ruby>新鮮<rt>しんせん</rt></ruby>で<ruby>涼<rt>すず</rt></ruby>しかった。<ruby>彼<rt>かれ</rt></ruby>は<ruby>思<rt>おも</rt></ruby>った。「<ruby>毎日<rt>まいにち</rt></ruby>がこんな<ruby>風<rt>ふう</rt></ruby>に<ruby>穏<rt>おだ</rt></ruby>やかに<ruby>始<rt>はじ</rt></ruby>まれば、<ruby>仕事<rt>しごと</rt></ruby>もずっと<ruby>楽<rt>らく</rt></ruby>だろうな。でも、きっと<ruby>昨日<rt>きのう</rt></ruby>の<ruby>大変<rt>たいへん</rt></ruby>さが、<ruby>今日<rt>きょう</rt></ruby>の<ruby>幸<rt>しあわ</rt></ruby>せをもっと<ruby>大切<rt>たいせつ</rt></ruby>にさせてくれるんだ。」</p>
+  <p><ruby>彼<rt>かれ</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かって<ruby>歩<rt>ある</rt></ruby>き<ruby>始<rt>はじ</rt></ruby>めた。<ruby>今日<rt>きょう</rt></ruby>は<ruby>全力<rt>ぜんりょく</rt></ruby>で<ruby>頑張<rt>がんば</rt></ruby>ろうと<ruby>決意<rt>けつい</rt></ruby>していた。</p>
+  <p>「<ruby>今日<rt>きょう</rt></ruby>は<ruby>大事<rt>だいじ</rt></ruby>な<ruby>日<rt>ひ</rt></ruby>だ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>駅<rt>えき</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かいながら<ruby>思<rt>おも</rt></ruby>った。「プレゼン、<ruby>歯医者<rt>はいしゃ</rt></ruby>、それから<ruby>家族<rt>かぞく</rt></ruby>のところへ。<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>計画通<rt>けいかくどお</rt></ruby>りに<ruby>進<rt>すす</rt></ruby>むと<ruby>良<rt>よ</rt></ruby>いな。」</p>
+</section>
+
+</article>
+
+<!-- ================================================== -->
+<!-- СЕССИЯ 4: Главы 10-13 + финал -->
+<!-- ================================================== -->
+<article class="session" data-session="4">
+<h2>Сессия 4 — Зубной, презентация, семья<span class="session-sub">Главы 10・11・12・13 + ［おわり］</span></h2>
+
+<section class="chapter" data-chapter="10">
+  <h3><span class="ch-num">第10章</span> <ruby>歯医者<rt>はいしゃ</rt></ruby>での<ruby>朝<rt>あさ</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p>その<ruby>日<rt>ひ</rt></ruby>の<ruby>午後<rt>ごご</rt></ruby>、<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>少<rt>すこ</rt></ruby>し<ruby>早<rt>はや</rt></ruby>く<ruby>出<rt>で</rt></ruby>て、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>予約<rt>よやく</rt></ruby>していた<ruby>歯科<rt>しか</rt></ruby><ruby>医院<rt>いいん</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。<ruby>駅<rt>えき</rt></ruby>から<ruby>歩<rt>ある</rt></ruby>いて5<ruby>分<rt>ふん</rt></ruby>の<ruby>所<rt>ところ</rt></ruby>に、<ruby>小<rt>ちい</rt></ruby>さな「<ruby>桜<rt>さくら</rt></ruby><ruby>歯科<rt>しか</rt></ruby><ruby>医院<rt>いいん</rt></ruby>」があった。<ruby>受付<rt>うけつけ</rt></ruby>には「<ruby>診察時間<rt>しんさつじかん</rt></ruby>：<ruby>午前<rt>ごぜん</rt></ruby>9<ruby>時<rt>じ</rt></ruby>から<ruby>午後<rt>ごご</rt></ruby>7<ruby>時<rt>じ</rt></ruby>まで。<ruby>予約<rt>よやく</rt></ruby>のない<ruby>方<rt>かた</rt></ruby>はお<ruby>待<rt>ま</rt></ruby>ちいただく<ruby>場合<rt>ばあい</rt></ruby>がございます。」と<ruby>書<rt>か</rt></ruby>いてあった。</p>
+  <p class="dialogue">「こんにちは。<ruby>田中<rt>たなか</rt></ruby>と<ruby>申<rt>もう</rt></ruby>します。<ruby>昨日<rt>きのう</rt></ruby>、<ruby>夕方<rt>ゆうがた</rt></ruby>6<ruby>時<rt>じ</rt></ruby>に<ruby>予約<rt>よやく</rt></ruby>をしたのですが。」</p>
+  <p class="dialogue">「かしこまりました、<ruby>田中<rt>たなか</rt></ruby>さん。<ruby>少<rt>しょう</rt></ruby>々お<ruby>待<rt>ま</rt></ruby>ちください。」</p>
+  <p><ruby>待合室<rt>まちあいしつ</rt></ruby>で<ruby>雑誌<rt>ざっし</rt></ruby>を<ruby>読<rt>よ</rt></ruby>みながら<ruby>待<rt>ま</rt></ruby>っていると、<ruby>看護師<rt>かんごし</rt></ruby>が<ruby>名前<rt>なまえ</rt></ruby>を<ruby>呼<rt>よ</rt></ruby>んだ。<ruby>診察室<rt>しんさつしつ</rt></ruby>に<ruby>通<rt>とお</rt></ruby>されると、<ruby>白<rt>しろ</rt></ruby>い<ruby>服<rt>ふく</rt></ruby>を<ruby>着<rt>き</rt></ruby>た<ruby>若<rt>わか</rt></ruby>い<ruby>歯医者<rt>はいしゃ</rt></ruby>さんが<ruby>笑顔<rt>えがお</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「こんにちは。どの<ruby>歯<rt>は</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>むんですか。」</p>
+  <p class="dialogue">「こちらの<ruby>奥歯<rt>おくば</rt></ruby>が、2<ruby>週間<rt>しゅうかん</rt></ruby>ほど<ruby>前<rt>まえ</rt></ruby>から<ruby>痛<rt>いた</rt></ruby>むんです。だんだんひどくなって、<ruby>冷<rt>つめ</rt></ruby>たいものを<ruby>飲<rt>の</rt></ruby>むと、<ruby>特<rt>とく</rt></ruby>にしみるんです。」</p>
+  <p><ruby>歯医者<rt>はいしゃ</rt></ruby>さんは<ruby>口<rt>くち</rt></ruby>の<ruby>中<rt>なか</rt></ruby>を<ruby>細<rt>こま</rt></ruby>かく<ruby>調<rt>しら</rt></ruby>べて、レントゲンも<ruby>撮<rt>と</rt></ruby>った。</p>
+  <p class="dialogue">「<ruby>虫歯<rt>むしば</rt></ruby>ですね。<ruby>少<rt>すこ</rt></ruby>し<ruby>深<rt>ふか</rt></ruby>くなっていますが、まだ<ruby>抜<rt>ぬ</rt></ruby>かなくても<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>です。<ruby>今日<rt>きょう</rt></ruby>は<ruby>治療<rt>ちりょう</rt></ruby>をして、<ruby>薬<rt>くすり</rt></ruby>を<ruby>出<rt>だ</rt></ruby>します。<ruby>痛<rt>いた</rt></ruby>み<ruby>止<rt>ど</rt></ruby>めもお<ruby>出<rt>だ</rt></ruby>ししますが、もし<ruby>夜<rt>よる</rt></ruby>も<ruby>痛<rt>いた</rt></ruby>むようだったら、またお<ruby>電話<rt>でんわ</rt></ruby>ください。」</p>
+  <p><ruby>治療<rt>ちりょう</rt></ruby>は30<ruby>分<rt>ぷん</rt></ruby>ほどで<ruby>終<rt>お</rt></ruby>わった。<ruby>口<rt>くち</rt></ruby>の<ruby>中<rt>なか</rt></ruby>はまだ<ruby>少<rt>すこ</rt></ruby>し<ruby>痺<rt>しび</rt></ruby>れていたが、<ruby>痛<rt>いた</rt></ruby>みはすでに<ruby>楽<rt>らく</rt></ruby>になっていた。</p>
+  <p class="dialogue">「ありがとうございます。<ruby>明日<rt>あした</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>までに、<ruby>痛<rt>いた</rt></ruby>みが<ruby>治<rt>なお</rt></ruby>っていると<ruby>良<rt>よ</rt></ruby>いな。」</p>
+  <p class="dialogue">きっと<ruby>良<rt>よ</rt></ruby>くなりますよ。それから、<ruby>今日<rt>きょう</rt></ruby>は<ruby>硬<rt>かた</rt></ruby>いものを<ruby>噛<rt>か</rt></ruby>まないでください。お<ruby>大事<rt>だいじ</rt></ruby>に。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>保険証<rt>ほけんしょう</rt></ruby>と<ruby>診察券<rt>しんさつけん</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>取<rt>と</rt></ruby>り、<ruby>会計<rt>かいけい</rt></ruby>を<ruby>済<rt>す</rt></ruby>ませた。3000<ruby>円<rt>えん</rt></ruby>だった。レシートを<ruby>財布<rt>さいふ</rt></ruby>に<ruby>入<rt>い</rt></ruby>れて、<ruby>医院<rt>いいん</rt></ruby>を<ruby>出<rt>で</rt></ruby>た。</p>
+  <p>「<ruby>歯医者<rt>はいしゃ</rt></ruby>は<ruby>苦手<rt>にがて</rt></ruby>だったけど、<ruby>行<rt>い</rt></ruby>って<ruby>良<rt>よ</rt></ruby>かった。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>思<rt>おも</rt></ruby>った。「もし<ruby>放<rt>ほう</rt></ruby>っておいたら、もっと<ruby>大変<rt>たいへん</rt></ruby>なことになっていたかもしれない。<ruby>体<rt>からだ</rt></ruby>のことは、<ruby>早<rt>はや</rt></ruby>めに<ruby>相談<rt>そうだん</rt></ruby>するのが<ruby>一番<rt>いちばん</rt></ruby>だな。」</p>
+  <p><ruby>会社<rt>かいしゃ</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る<ruby>電車<rt>でんしゃ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で、<ruby>彼<rt>かれ</rt></ruby>は<ruby>明日<rt>あした</rt></ruby>のプレゼンの<ruby>資料<rt>しりょう</rt></ruby>をもう<ruby>一度<rt>いちど</rt></ruby><ruby>見直<rt>みなお</rt></ruby>した。</p>
+</section>
+
+<section class="chapter" data-chapter="11">
+  <h3><span class="ch-num">第11章</span> <ruby>大切<rt>たいせつ</rt></ruby>なプレゼンテーション</h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>翌日<rt>よくじつ</rt></ruby>の<ruby>午前中<rt>ごぜんちゅう</rt></ruby>、<ruby>会議室<rt>かいぎしつ</rt></ruby>には<ruby>大勢<rt>おおぜい</rt></ruby>の<ruby>人<rt>ひと</rt></ruby>が<ruby>集<rt>あつ</rt></ruby>まっていた。<ruby>田中<rt>たなか</rt></ruby>さんはネクタイを<ruby>直<rt>なお</rt></ruby>して、<ruby>書類<rt>しょるい</rt></ruby>をきちんと<ruby>並<rt>なら</rt></ruby>べた。パソコンとプロジェクターの<ruby>準備<rt>じゅんび</rt></ruby>も、あらかじめ<ruby>済<rt>す</rt></ruby>ませておいた。</p>
+  <p>お<ruby>客様<rt>きゃくさま</rt></ruby>が<ruby>入<rt>はい</rt></ruby>ってきた。<ruby>田中<rt>たなか</rt></ruby>さんと<ruby>同僚<rt>どうりょう</rt></ruby>の<ruby>佐藤<rt>さとう</rt></ruby>さんは、<ruby>玄関<rt>げんかん</rt></ruby>まで<ruby>出迎<rt>でむか</rt></ruby>えた。</p>
+  <p class="dialogue">「いらっしゃいませ。<ruby>本日<rt>ほんじつ</rt></ruby>はお<ruby>忙<rt>いそが</rt></ruby>しいところ、お<ruby>越<rt>こ</rt></ruby>しくださいまして、ありがとうございます。」</p>
+  <p class="dialogue">「こちらこそ。<ruby>楽<rt>たの</rt></ruby>しみにしていました。」</p>
+  <p>プレゼンが<ruby>始<rt>はじ</rt></ruby>まった。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>少<rt>すこ</rt></ruby>し<ruby>緊張<rt>きんちょう</rt></ruby>していたが、<ruby>深呼吸<rt>しんこきゅう</rt></ruby>をして、<ruby>落<rt>お</rt></ruby>ち<ruby>着<rt>つ</rt></ruby>いて<ruby>話<rt>はな</rt></ruby>し<ruby>始<rt>はじ</rt></ruby>めた。スクリーンには、<ruby>新<rt>あたら</rt></ruby>しい<ruby>商品<rt>しょうひん</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>が<ruby>書<rt>か</rt></ruby>かれていた。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>は、<ruby>私<rt>わたし</rt></ruby>どもの<ruby>新<rt>あたら</rt></ruby>しい<ruby>商品<rt>しょうひん</rt></ruby>について、ご<ruby>説明<rt>せつめい</rt></ruby>させていただきます。まず、こちらの<ruby>資料<rt>しりょう</rt></ruby>を<ruby>見<rt>み</rt></ruby>てください。」</p>
+  <p>お<ruby>客様<rt>きゃくさま</rt></ruby>は<ruby>熱心<rt>ねっしん</rt></ruby>に<ruby>聞<rt>き</rt></ruby>いてくれていた。<ruby>時々<rt>ときどき</rt></ruby>、<ruby>質問<rt>しつもん</rt></ruby>をしてくる<ruby>人<rt>ひと</rt></ruby>もいた。<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>分<rt>わ</rt></ruby>かりやすく<ruby>丁寧<rt>ていねい</rt></ruby>に<ruby>答<rt>こた</rt></ruby>えた。<ruby>佐藤<rt>さとう</rt></ruby>さんも、<ruby>補足<rt>ほそく</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>を<ruby>手伝<rt>てつだ</rt></ruby>ってくれた。</p>
+  <p>プレゼンの<ruby>途中<rt>とちゅう</rt></ruby>、<ruby>山田<rt>やまだ</rt></ruby>さんが<ruby>部屋<rt>へや</rt></ruby>の<ruby>後<rt>うしろ</rt></ruby>で<ruby>見<rt>み</rt></ruby>ていた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>気<rt>き</rt></ruby>づいたが、<ruby>集中<rt>しゅうちゅう</rt></ruby>を<ruby>切<rt>き</rt></ruby>らさなかった。</p>
+  <p class="dialogue">「この<ruby>商品<rt>しょうひん</rt></ruby>を<ruby>使<rt>つか</rt></ruby>えば、<ruby>今<rt>いま</rt></ruby>までの<ruby>作業時間<rt>さぎょうじかん</rt></ruby>が<ruby>半分<rt>はんぶん</rt></ruby>になります。また、<ruby>費用<rt>ひよう</rt></ruby>も3<ruby>割<rt>わり</rt></ruby><ruby>削減<rt>さくげん</rt></ruby>できます。」</p>
+  <p>お<ruby>客様<rt>きゃくさま</rt></ruby>はうなずきながら<ruby>聞<rt>き</rt></ruby>いていた。<ruby>終<rt>お</rt></ruby>わる<ruby>頃<rt>ごろ</rt></ruby>には、みんなの<ruby>顔<rt>かお</rt></ruby>に<ruby>満足<rt>まんぞく</rt></ruby>そうな<ruby>表情<rt>ひょうじょう</rt></ruby>が<ruby>見<rt>み</rt></ruby>えた。</p>
+  <p>プレゼンが<ruby>終<rt>お</rt></ruby>わると、お<ruby>客様<rt>きゃくさま</rt></ruby>の<ruby>代表<rt>だいひょう</rt></ruby>が<ruby>立<rt>た</rt></ruby>ち<ruby>上<rt>あ</rt></ruby>がって<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「とても<ruby>分<rt>わ</rt></ruby>かりやすい<ruby>説明<rt>せつめい</rt></ruby>でした。<ruby>私<rt>わたし</rt></ruby>たちとしては、ぜひ<ruby>詳細<rt>しょうさい</rt></ruby>を<ruby>検討<rt>けんとう</rt></ruby>させていただきたいと<ruby>思<rt>おも</rt></ruby>います。」</p>
+  <p class="dialogue">「ありがとうございます!<ruby>ご検討<rt>けんとう</rt></ruby>のほど、よろしくお<ruby>願<rt>ねが</rt></ruby>いいたします。」</p>
+  <p><ruby>山田<rt>やまだ</rt></ruby>さんが<ruby>近<rt>ちか</rt></ruby>づいてきて、<ruby>田中<rt>たなか</rt></ruby>さんの<ruby>肩<rt>かた</rt></ruby>を<ruby>軽<rt>かる</rt></ruby>く<ruby>叩<rt>たた</rt></ruby>いた。</p>
+  <p class="dialogue">「よくやったな。お<ruby>客様<rt>きゃくさま</rt></ruby>も<ruby>喜<rt>よろこ</rt></ruby>んでいたぞ。」</p>
+  <p class="dialogue">「お<ruby>褒<rt>ほ</rt></ruby>めの<ruby>言葉<rt>ことば</rt></ruby>、ありがとうございます。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>安堵<rt>あんど</rt></ruby>の<ruby>表情<rt>ひょうじょう</rt></ruby>を<ruby>浮<rt>う</rt></ruby>かべた。「<ruby>頑張<rt>がんば</rt></ruby>って<ruby>良<rt>よ</rt></ruby>かった。もし<ruby>準備<rt>じゅんび</rt></ruby>を<ruby>怠<rt>おこた</rt></ruby>っていたら、こんな<ruby>結果<rt>けっか</rt></ruby>にはならなかっただろうな。」</p>
+</section>
+
+<section class="chapter" data-chapter="12">
+  <h3><span class="ch-num">第12章</span> <ruby>家族<rt>かぞく</rt></ruby>との<ruby>再会<rt>さいかい</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>金曜日<rt>きんようび</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはできるだけ<ruby>早<rt>はや</rt></ruby>く<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>駅前<rt>えきまえ</rt></ruby>の<ruby>花屋<rt>はなや</rt></ruby>で<ruby>花束<rt>はなたば</rt></ruby>を<ruby>買<rt>か</rt></ruby>った。そして、<ruby>妻<rt>つま</rt></ruby>と<ruby>息子<rt>むすこ</rt></ruby>を<ruby>連<rt>つ</rt></ruby>れて、<ruby>姉<rt>あね</rt></ruby>の<ruby>家<rt>いえ</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。<ruby>両親<rt>りょうしん</rt></ruby>と<ruby>兄<rt>あに</rt></ruby>と<ruby>姉<rt>あね</rt></ruby>の<ruby>家族<rt>かぞく</rt></ruby>が、もう<ruby>集<rt>あつ</rt></ruby>まっていた。</p>
+  <p class="dialogue">「ただいま!」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>玄関<rt>げんかん</rt></ruby>で<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「おう、<ruby>田中<rt>たなか</rt></ruby>!よく<ruby>来<rt>き</rt></ruby>たな!」と<ruby>父<rt>ちち</rt></ruby>が<ruby>大<rt>おお</rt></ruby>きな<ruby>声<rt>こえ</rt></ruby>で<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>広<rt>ひろ</rt></ruby>い<ruby>リビング<rt>りびんぐ</rt></ruby>には、<ruby>大<rt>おお</rt></ruby>きなテーブルが<ruby>用意<rt>ようい</rt></ruby>されていて、みんなで<ruby>囲<rt>かこ</rt></ruby>む<ruby>夕食会<rt>ゆうしょくかい</rt></ruby>の<ruby>準備<rt>じゅんび</rt></ruby>ができていた。<ruby>母<rt>はは</rt></ruby>は<ruby>田中<rt>たなか</rt></ruby>さんの<ruby>顔<rt>かお</rt></ruby>を<ruby>見<rt>み</rt></ruby>ると、<ruby>目<rt>め</rt></ruby>を<ruby>細<rt>ほそ</rt></ruby>めて<ruby>笑<rt>わら</rt></ruby>った。</p>
+  <p class="dialogue">「<ruby>元気<rt>げんき</rt></ruby>そうで<ruby>何<rt>なに</rt></ruby>よりだよ。<ruby>健太<rt>けんた</rt></ruby>もずいぶん<ruby>大<rt>おお</rt></ruby>きくなったね。」</p>
+  <p class="dialogue">「ええ、<ruby>最近<rt>さいきん</rt></ruby>は<ruby>一人<rt>ひとり</rt></ruby>で<ruby>立<rt>た</rt></ruby>とうとして、<ruby>毎日<rt>まいにち</rt></ruby><ruby>大変<rt>たいへん</rt></ruby>ですよ。」とゆみさんが<ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>兄<rt>あに</rt></ruby>は<ruby>出張<rt>しゅっちょう</rt></ruby>から<ruby>戻<rt>もど</rt></ruby>ったばかりで、<ruby>少<rt>すこ</rt></ruby>し<ruby>疲<rt>つか</rt></ruby>れた<ruby>顔<rt>かお</rt></ruby>をしていたが、<ruby>嬉<rt>うれ</rt></ruby>しそうに<ruby>話<rt>はな</rt></ruby>していた。<ruby>姉<rt>あね</rt></ruby>は<ruby>子供<rt>こども</rt></ruby>たちの<ruby>世話<rt>せわ</rt></ruby>を<ruby>しながら<rt>しながら</rt></ruby>、<ruby>東京<rt>とうきょう</rt></ruby>の<ruby>新<rt>あたら</rt></ruby>しいカフェの<ruby>話<rt>はなし</rt></ruby>をしてくれた。<ruby>弟<rt>おとうと</rt></ruby>は<ruby>大学<rt>だいがく</rt></ruby>の<ruby>受験<rt>じゅけん</rt></ruby>を<ruby>終<rt>お</rt></ruby>えて、<ruby>安心<rt>あんしん</rt></ruby>した<ruby>様子<rt>ようす</rt></ruby>だった。<ruby>妹<rt>いもうと</rt></ruby>は、<ruby>学校<rt>がっこう</rt></ruby>の<ruby>友達<rt>ともだち</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>を<ruby>楽<rt>たの</rt></ruby>しそうにしていた。</p>
+  <p class="dialogue">「みんなが<ruby>揃<rt>そろ</rt></ruby>うのは、<ruby>久<rt>ひさ</rt></ruby>しぶりだな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「そうだね。」と<ruby>父<rt>ちち</rt></ruby>が<ruby>答<rt>こた</rt></ruby>えた。「お<ruby>前<rt>まえ</rt></ruby>たち<ruby>兄弟<rt>きょうだい</rt></ruby>が<ruby>小<rt>ちい</rt></ruby>さかった<ruby>頃<rt>ころ</rt></ruby>を<ruby>思<rt>おも</rt></ruby>い<ruby>出<rt>だ</rt></ruby>すよ。」</p>
+  <p>テーブルには、<ruby>寿司<rt>すし</rt></ruby>と<ruby>天ぷら<rt>てんぷら</rt></ruby>と<ruby>肉じゃが<rt>にくじゃが</rt></ruby>と、お<ruby>好<rt>す</rt></ruby>き<ruby>焼<rt>や</rt></ruby>きが<ruby>並<rt>なら</rt></ruby>んでいた。<ruby>田中<rt>たなか</rt></ruby>さんはビールを<ruby>一杯<rt>いっぱい</rt></ruby><ruby>注<rt>そそ</rt></ruby>いで、<ruby>父<rt>ちち</rt></ruby>と<ruby>乾杯<rt>かんぱい</rt></ruby>した。</p>
+  <p class="dialogue">「お<ruby>父<rt>とう</rt></ruby>さん、お<ruby>母<rt>かあ</rt></ruby>さん、<ruby>遠<rt>とお</rt></ruby>いところをわざわざ<ruby>来<rt>き</rt></ruby>てくれて、ありがとう。」</p>
+  <p class="dialogue">「いやいや、<ruby>孫<rt>まご</rt></ruby>に<ruby>会<rt>あ</rt></ruby>いたくて<ruby>来<rt>き</rt></ruby>たんだよ。」</p>
+  <p><ruby>食事<rt>しょくじ</rt></ruby>の<ruby>後<rt>あと</rt></ruby>、<ruby>健太<rt>けんた</rt></ruby>が<ruby>祖父<rt>そふ</rt></ruby>の<ruby>膝<rt>ひざ</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>でおもちゃで<ruby>遊<rt>あそ</rt></ruby>び<ruby>始<rt>はじ</rt></ruby>めた。<ruby>祖母<rt>そぼ</rt></ruby>は、<ruby>孫<rt>まご</rt></ruby>の<ruby>笑顔<rt>えがお</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、とても<ruby>幸<rt>しあわ</rt></ruby>せそうだった。</p>
+  <p class="dialogue">「<ruby>健太<rt>けんた</rt></ruby>には、<ruby>私<rt>わたし</rt></ruby>たちが<ruby>作<rt>つく</rt></ruby>った<ruby>和菓子<rt>わがし</rt></ruby>を<ruby>持<rt>も</rt></ruby>ってきたのよ。」と<ruby>祖母<rt>そぼ</rt></ruby>が<ruby>言<rt>い</rt></ruby>った。「お<ruby>茶<rt>ちゃ</rt></ruby>と<ruby>一緒<rt>いっしょ</rt></ruby>に、<ruby>後<rt>あと</rt></ruby>で<ruby>食<rt>た</rt></ruby>べてね。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんはゆみさんの<ruby>手<rt>て</rt></ruby>を<ruby>握<rt>にぎ</rt></ruby>りながら、<ruby>家族<rt>かぞく</rt></ruby>の<ruby>笑<rt>わら</rt></ruby>い<ruby>声<rt>ごえ</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いていた。「こうして<ruby>全員<rt>ぜんいん</rt></ruby>が<ruby>集<rt>あつ</rt></ruby>まるのは、<ruby>本当<rt>ほんとう</rt></ruby>に<ruby>良<rt>よ</rt></ruby>いことだな。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>思<rt>おも</rt></ruby>った。「<ruby>来年<rt>らいねん</rt></ruby>も、<ruby>再来月<rt>さらいげつ</rt></ruby>も、こんな<ruby>時間<rt>じかん</rt></ruby>を<ruby>大切<rt>たいせつ</rt></ruby>にしたい。」</p>
+  <p><ruby>夜<rt>よる</rt></ruby><ruby>遅<rt>おく</rt></ruby>くまで、<ruby>家族<rt>かぞく</rt></ruby>で<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ったり、<ruby>昔話<rt>むかしばなし</rt></ruby>をしたりして、<ruby>楽<rt>たの</rt></ruby>しい<ruby>時間<rt>じかん</rt></ruby>を<ruby>過<rt>す</rt></ruby>ごした。</p>
+</section>
+
+<section class="chapter" data-chapter="13">
+  <h3><span class="ch-num">第13章</span> <ruby>新<rt>あたら</rt></ruby>しい<ruby>朝<rt>あさ</rt></ruby></h3>
+  <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
+  <p><ruby>週末<rt>しゅうまつ</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはいつもより<ruby>少<rt>すこ</rt></ruby>し<ruby>遅<rt>おく</rt></ruby>く<ruby>起<rt>お</rt></ruby>きた。<ruby>窓<rt>まど</rt></ruby>から<ruby>柔<rt>やわ</rt></ruby>らかい<ruby>日差<rt>ひざ</rt></ruby>しが<ruby>差<rt>さ</rt></ruby>し<ruby>込<rt>こ</rt></ruby>んでいた。ゆみさんはもう<ruby>起<rt>お</rt></ruby>きていて、<ruby>リビング<rt>りびんぐ</rt></ruby>で<ruby>健太<rt>けんた</rt></ruby>と<ruby>遊<rt>あそ</rt></ruby>んでいた。</p>
+  <p class="dialogue">「おはよう。<ruby>良<rt>よ</rt></ruby>く<ruby>眠<rt>ねむ</rt></ruby>れた?」とゆみさんが<ruby>尋<rt>たず</rt></ruby>ねた。</p>
+  <p class="dialogue">「うん、とても<ruby>良<rt>よ</rt></ruby>く<ruby>眠<rt>ねむ</rt></ruby>れたよ。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>伸<rt>の</rt></ruby>びを<ruby>しながら<rt>しながら</rt></ruby><ruby>答<rt>こた</rt></ruby>えた。</p>
+  <p><ruby>二人<rt>ふたり</rt></ruby>はコーヒーを<ruby>飲<rt>の</rt></ruby>みながら、これからの<ruby>計画<rt>けいかく</rt></ruby>を<ruby>話<rt>はな</rt></ruby>した。</p>
+  <p class="dialogue">「もし<ruby>来月<rt>らいげつ</rt></ruby>、<ruby>休<rt>やす</rt></ruby>みが<ruby>取<rt>と</rt></ruby>れたら、どこかへ<ruby>旅行<rt>りょこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>きたいな。」と<ruby>田中<rt>たなか</rt></ruby>さんが<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「いいね。どこが<ruby>良<rt>い</rt></ruby>い?<ruby>海<rt>うみ</rt></ruby>?それとも<ruby>山<rt>やま</rt></ruby>?」</p>
+  <p class="dialogue">「<ruby>海<rt>うみ</rt></ruby>が<ruby>良<rt>よ</rt></ruby>いな。<ruby>健太<rt>けんた</rt></ruby>に、<ruby>初<rt>はじ</rt></ruby>めて<ruby>海<rt>うみ</rt></ruby>を<ruby>見<rt>み</rt></ruby>せてあげたいんだ。」</p>
+  <p><ruby>健太<rt>けんた</rt></ruby>が「パパ」と<ruby>言<rt>い</rt></ruby>いながら、<ruby>田中<rt>たなか</rt></ruby>さんに<ruby>抱<rt>だ</rt></ruby>っこを<ruby>求<rt>もと</rt></ruby>めた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>息子<rt>むすこ</rt></ruby>を<ruby>抱<rt>だ</rt></ruby>き<ruby>上<rt>あ</rt></ruby>げて、<ruby>窓<rt>まど</rt></ruby>の<ruby>外<rt>そと</rt></ruby>を<ruby>見<rt>み</rt></ruby>せた。</p>
+  <p class="dialogue">「あそこに<ruby>公園<rt>こうえん</rt></ruby>があるでしょう。<ruby>今日<rt>きょう</rt></ruby>は<ruby>天気<rt>てんき</rt></ruby>が<ruby>良<rt>よ</rt></ruby>いから、あそこで<ruby>遊<rt>あそ</rt></ruby>ぼうね。」</p>
+  <p>ゆみさんが<ruby>微笑<rt>ほほえ</rt></ruby>みながら<ruby>言<rt>い</rt></ruby>った。</p>
+  <p class="dialogue">「<ruby>今日<rt>きょう</rt></ruby>はゆっくり<ruby>過<rt>す</rt></ruby>ごしましょう。<ruby>来週<rt>らいしゅう</rt></ruby>からまた<ruby>忙<rt>いそが</rt></ruby>しくなるんだから。」</p>
+  <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>頷<rt>うなず</rt></ruby>いて、<ruby>家族<rt>かぞく</rt></ruby>の<ruby>温<rt>あたた</rt></ruby>かい<ruby>雰囲気<rt>ふんいき</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で、<ruby>新<rt>あたら</rt></ruby>しい<ruby>一日<rt>いちにち</rt></ruby>の<ruby>始<rt>はじ</rt></ruby>まりを<ruby>感<rt>かん</rt></ruby>じていた。</p>
+  <p>「<ruby>毎日<rt>まいにち</rt></ruby>がこんな<ruby>風<rt>ふう</rt></ruby>なら、どんな<ruby>仕事<rt>しごと</rt></ruby>も<ruby>頑張<rt>がんば</rt></ruby>れるな。」と<ruby>彼<rt>かれ</rt></ruby>は<ruby>心<rt>こころ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>思<rt>おも</rt></ruby>った。「<ruby>家族<rt>かぞく</rt></ruby>のために、そして<ruby>自分<rt>じぶん</rt></ruby>のために、これからも<ruby>頑張<rt>がんば</rt></ruby>ろう。」</p>
+  <p>そして、<ruby>三人<rt>さんにん</rt></ruby>は<ruby>朝<rt>あさ</rt></ruby>の<ruby>光<rt>ひかり</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で、<ruby>新<rt>あたら</rt></ruby>しい<ruby>一日<rt>いちにち</rt></ruby>を<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>歩<rt>ある</rt></ruby>き<ruby>始<rt>はじ</rt></ruby>めた。</p>
+  <p class="finale-marker">［ お わ り ］</p>
+</section>
+
+</article>
+
+</main>
+
+<script>
+/* ========================================================================
+   田中さんの一日 — клиентский скрипт
+   - переключение режима фуриганы (показывать / скрыть / по наведению)
+   - переключение сессий
+   - чекбоксы "прочитано" + localStorage
+   - прогресс-бар
+   - размер шрифта
+   - тёмная/светлая тема
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'tanaka_no_ichi_nichi_v1';
+
+  /* ---------- localStorage ---------- */
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) { /* localStorage недоступен — игнор */ }
+  }
+  var state = loadState();
+  if (!state.readChapters) state.readChapters = {};
+  if (!state.fontsize) state.fontsize = 'medium';
+  if (!state.theme) state.theme = 'dark';
+  if (!state.furigana) state.furigana = 'shown'; // shown | hidden | hover
+  if (!state.currentSession) state.currentSession = 1;
+
+  /* ---------- DOM refs ---------- */
+  var body = document.body;
+  var chapters = document.querySelectorAll('.chapter');
+  var sessions = document.querySelectorAll('.session');
+  var sessionButtons = document.querySelectorAll('.session-nav button');
+  var progFill = document.getElementById('prog-fill');
+  var progText = document.getElementById('prog-text');
+  var btnFuriShow = document.getElementById('btn-furigana-show');
+  var btnFuriHide = document.getElementById('btn-furigana-hide');
+  var btnFuriHover = document.getElementById('btn-furigana-hover');
+  var selFontsize = document.getElementById('sel-fontsize');
+  var btnTheme = document.getElementById('btn-theme');
+  var btnReset = document.getElementById('btn-reset');
+
+  /* ---------- Применяем сохранённое состояние ---------- */
+  applyFontsize(state.fontsize);
+  applyTheme(state.theme);
+  applyFurigana(state.furigana);
+  showSession(state.currentSession);
+  chapters.forEach(function (ch) {
+    var id = ch.getAttribute('data-chapter');
+    var cb = ch.querySelector('.ch-check');
+    if (state.readChapters[id]) {
+      cb.checked = true;
+      ch.classList.add('read');
+    }
+  });
+  updateProgress();
+
+  /* ---------- Фуригана ---------- */
+  function applyFurigana(mode) {
+    state.furigana = mode;
+    body.classList.remove('furigana-shown', 'furigana-hidden', 'furigana-hover');
+    body.classList.add('furigana-' + mode);
+    btnFuriShow.classList.remove('active');
+    btnFuriHide.classList.remove('active');
+    btnFuriHover.classList.remove('active');
+    if (mode === 'shown')  btnFuriShow.classList.add('active');
+    if (mode === 'hidden') btnFuriHide.classList.add('active');
+    if (mode === 'hover')  btnFuriHover.classList.add('active');
+    saveState(state);
+  }
+  btnFuriShow.addEventListener('click', function () { applyFurigana('shown'); });
+  btnFuriHide.addEventListener('click', function () { applyFurigana('hidden'); });
+  btnFuriHover.addEventListener('click', function () { applyFurigana('hover'); });
+
+  /* По тапу на кандзи в режиме "hover" — показать фуригану (для мобильных) */
+  document.addEventListener('click', function (e) {
+    if (state.furigana !== 'hover') return;
+    var ruby = e.target.closest('ruby');
+    if (!ruby) return;
+    // тоггл: один тап — показать, второй — спрятать
+    if (ruby.dataset.tapShown === '1') {
+      ruby.dataset.tapShown = '0';
+      // CSS автоматически скроет если не hover
+    } else {
+      // сбросить всем и пометить выбранный
+      document.querySelectorAll('ruby[data-tap-shown="1"]').forEach(function (r) { r.dataset.tapShown = '0'; });
+      ruby.dataset.tapShown = '1';
+    }
+  });
+  // CSS-трюк: в режиме hover, ruby с data-tap-shown="1" показывает rt
+  var hoverCss = document.createElement('style');
+  hoverCss.textContent = 'body.furigana-hover ruby[data-tap-shown="1"] rt { display: inline; }';
+  document.head.appendChild(hoverCss);
+
+  /* ---------- Сессии ---------- */
+  function showSession(n) {
+    state.currentSession = n;
+    sessions.forEach(function (s) {
+      var id = parseInt(s.getAttribute('data-session'), 10);
+      s.classList.toggle('active', id === n);
+    });
+    sessionButtons.forEach(function (b) {
+      var id = parseInt(b.getAttribute('data-session'), 10);
+      b.classList.toggle('active', id === n);
+    });
+    // плавно прокрутить к началу контента
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    saveState(state);
+  }
+  sessionButtons.forEach(function (b) {
+    b.addEventListener('click', function () {
+      showSession(parseInt(b.getAttribute('data-session'), 10));
+    });
+  });
+
+  /* ---------- Чекбоксы "прочитано" ---------- */
+  chapters.forEach(function (ch) {
+    var id = ch.getAttribute('data-chapter');
+    var cb = ch.querySelector('.ch-check');
+    cb.addEventListener('change', function () {
+      if (cb.checked) {
+        state.readChapters[id] = true;
+        ch.classList.add('read');
+      } else {
+        delete state.readChapters[id];
+        ch.classList.remove('read');
+      }
+      saveState(state);
+      updateProgress();
+    });
+  });
+
+  /* ---------- Прогресс ---------- */
+  function updateProgress() {
+    var total = chapters.length;
+    var done = 0;
+    chapters.forEach(function (ch) {
+      var id = ch.getAttribute('data-chapter');
+      if (state.readChapters[id]) done++;
+    });
+    var pct = total ? Math.round(done / total * 100) : 0;
+    progFill.style.width = pct + '%';
+    progText.textContent = done + ' / ' + total + ' (' + pct + '%)';
+  }
+
+  /* ---------- Размер шрифта ---------- */
+  function applyFontsize(sz) {
+    state.fontsize = sz;
+    body.setAttribute('data-fontsize', sz);
+    selFontsize.value = sz;
+    saveState(state);
+  }
+  selFontsize.addEventListener('change', function () { applyFontsize(selFontsize.value); });
+
+  /* ---------- Тема ---------- */
+  function applyTheme(t) {
+    state.theme = t;
+    body.classList.remove('theme-dark', 'theme-light');
+    body.classList.add('theme-' + t);
+    btnTheme.textContent = t === 'dark' ? '☀ тема' : '🌙 тема';
+    saveState(state);
+  }
+  btnTheme.addEventListener('click', function () {
+    applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+  });
+
+  /* ---------- Сброс прогресса ---------- */
+  btnReset.addEventListener('click', function () {
+    if (!confirm('Сбросить весь прогресс (галочки "прочитано")? Тема, шрифт и фуригана останутся.')) return;
+    state.readChapters = {};
+    chapters.forEach(function (ch) {
+      ch.classList.remove('read');
+      var cb = ch.querySelector('.ch-check');
+      if (cb) cb.checked = false;
+    });
+    saveState(state);
+    updateProgress();
+  });
+
+  /* ---------- Горячие клавиши ---------- */
+  document.addEventListener('keydown', function (e) {
+    // 1-4 — сессии
+    if (e.key >= '1' && e.key <= '4' && !e.ctrlKey && !e.metaKey) {
+      showSession(parseInt(e.key, 10));
+      return;
+    }
+    // f — тоггл фуриганы
+    if (e.key === 'f' || e.key === 'F') {
+      var next = state.furigana === 'shown' ? 'hidden' : 'shown';
+      applyFurigana(next);
+    }
+  });
+})();
+</script>
+</body>
+</html>
