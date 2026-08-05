@@ -49,8 +49,63 @@ body.theme-light {
 }
 
 /* ============ ВЫДЕЛЕНИЕ ТЕКСТА ============ */
-::selection { background: var(--selection-bg); color: var(--selection-color); }
-::-moz-selection { background: var(--selection-bg); color: var(--selection-color); }
+::selection { background: var(--selection-bg); color: var(--selection-color); text-shadow: none; }
+::-moz-selection { background: var(--selection-bg); color: var(--selection-color); text-shadow: none; }
+/* На тёмном фоне нужен более яркий цвет, чтобы выделение было заметным */
+.theme-dark ::selection { background: #ff8c2a !important; color: #fff !important; }
+.theme-dark ::-moz-selection { background: #ff8c2a !important; color: #fff !important; }
+
+/* ============ ПОСТОЯННЫЕ ВЫДЕЛЕНИЯ ПОЛЬЗОВАТЕЛЯ ============ */
+mark.user-highlight {
+  background: rgba(255, 215, 100, 0.45);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0;
+  text-decoration: underline dotted rgba(180, 120, 20, 0.7);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+mark.user-highlight:hover {
+  background: rgba(255, 200, 80, 0.65);
+}
+mark.user-highlight::after {
+  content: '×';
+  position: absolute;
+  top: -8px;
+  right: -2px;
+  font-size: 11px;
+  line-height: 1;
+  color: #c0500a;
+  background: #fff8e0;
+  border: 1px solid #c08020;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+mark.user-highlight:hover::after {
+  display: flex;
+}
+.theme-dark mark.user-highlight {
+  background: rgba(255, 180, 60, 0.32);
+  color: #fff8e8;
+  text-decoration-color: rgba(255, 220, 120, 0.9);
+}
+.theme-dark mark.user-highlight:hover {
+  background: rgba(255, 180, 60, 0.5);
+}
+.theme-dark mark.user-highlight::after {
+  color: #fff8e0;
+  background: #5a3a10;
+  border-color: #d8a050;
+}
 
 /* ============ РАЗМЕР ШРИФТА ============ */
 body[data-fontsize="small"]  { --base-font-size: 16px; }
@@ -861,6 +916,25 @@ body.theme-light .anki-extra-sw{ color: #086020; }
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-title">Навигация</div>
+      <div class="settings-row">
+        <select id="sel-jump-chapter" title="Перейти к главе" aria-label="Перейти к главе" style="flex:1">
+          <option value="">Перейти к главе…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Мои выделения</div>
+      <div class="settings-row">
+        <button id="btn-clear-highlights" style="color:#c08020" title="Удалить все постоянные выделения в тексте">🗑 очистить выделения</button>
+      </div>
+      <div style="font-size:0.78em; color:var(--muted); margin-top:4px; line-height:1.4">
+        Выдели текст → он останется подсвеченным. Наведи курсор на выделение → появится <b>×</b> → кликни, чтобы удалить только это выделение.
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-title">Прогресс</div>
       <div class="settings-row">
         <button id="btn-reset" style="color:#e35a5a" title="Сбросить прогресс чтения">↻ сбросить прогресс</button>
@@ -877,7 +951,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
 <article class="session active" data-session="1">
 <h2>Сессия 1 — Утро, дорога, офис<span class="session-sub">Главы 1・2・3 · ~10 мин чтения</span></h2>
 
-<section class="chapter" data-chapter="1">
+<section class="chapter" data-chapter="1" id="ch-1">
   <h3><span class="ch-num">第1章</span> <ruby>田中<rt>たなか</rt></ruby>さんの<ruby>朝<rt>あさ</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p>7<ruby>月<rt>がつ</rt></ruby>20<ruby>日<rt>にち</rt></ruby>、<ruby>月曜日<rt>げつようび</rt></ruby>。<ruby>朝<rt>あさ</rt></ruby>の<ruby>空気<rt>くうき</rt></ruby>は<ruby>暖<rt>あたた</rt></ruby>かくて、<ruby>天気予報<rt>てんきよほう</rt></ruby>によると、<ruby>午前中<rt>ごぜんちゅう</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れて<ruby>暑<rt>あつ</rt></ruby>くなるが、<ruby>午後<rt>ごご</rt></ruby>は<ruby>強<rt>つよ</rt></ruby>い<ruby>風<rt>かぜ</rt></ruby>が<ruby>吹<rt>ふ</rt></ruby>いて、<ruby>台風<rt>たいふう</rt></ruby>が<ruby>来<rt>く</rt></ruby>るかもしれないと<ruby>言<rt>い</rt></ruby>っていた。</p>
@@ -900,7 +974,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p class="dialogue">「<ruby>家族<rt>かぞく</rt></ruby>が<ruby>一番<rt>いちばん</rt></ruby><ruby>大切<rt>たいせつ</rt></ruby>だな。」と<ruby>田中<rt>たなか</rt></ruby>さんは、<ruby>玄関<rt>げんかん</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かいながら<ruby>心<rt>こころ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>今日<rt>きょう</rt></ruby>も<ruby>仕事<rt>しごと</rt></ruby>はたくさんあるだろう。<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>時間内<rt>じかんない</rt></ruby>に<ruby>終<rt>お</rt></ruby>わらせて、<ruby>遅刻<rt>ちこく</rt></ruby>せずに<ruby>帰<rt>かえ</rt></ruby>りたいな。」</p>
 </section>
 
-<section class="chapter" data-chapter="2">
+<section class="chapter" data-chapter="2" id="ch-2">
   <h3><span class="ch-num">第2章</span> <ruby>駅<rt>えき</rt></ruby>までの<ruby>道<rt>みち</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>玄関<rt>げんかん</rt></ruby>に<ruby>出<rt>で</rt></ruby>た。もし<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>っても<ruby>濡<rt>ぬ</rt></ruby>れないように、<ruby>長<rt>なが</rt></ruby>い<ruby>黒<rt>くろ</rt></ruby>い<ruby>傘<rt>かさ</rt></ruby>を<ruby>持<rt>も</rt></ruby>っていくことにした。<ruby>白<rt>しろ</rt></ruby>いシャツに、<ruby>黒<rt>くろ</rt></ruby>いズボン、<ruby>茶色<rt>ちゃいろ</rt></ruby>い<ruby>靴<rt>くつ</rt></ruby>、そして<ruby>青<rt>あお</rt></ruby>い<ruby>上着<rt>うわぎ</rt></ruby>を<ruby>着<rt>き</rt></ruby>た。<ruby>軽<rt>かる</rt></ruby>いコートを<ruby>肩<rt>かた</rt></ruby>にかけ、<ruby>眼鏡<rt>めがね</rt></ruby>をかけ、ネクタイを<ruby>締<rt>し</rt></ruby>め、ベルトをした。カバンを<ruby>手<rt>て</rt></ruby>に<ruby>取<rt>と</rt></ruby>った。<ruby>中<rt>なか</rt></ruby>には、<ruby>面白<rt>おもしろ</rt></ruby>そうな<ruby>本<rt>ほん</rt></ruby>が<ruby>入<rt>はい</rt></ruby>っていた。</p>
@@ -922,7 +996,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p>「<ruby>駅<rt>えき</rt></ruby>はいつも<ruby>混雑<rt>こんざつ</rt></ruby>しているな。」と<ruby>田中<rt>たなか</rt></ruby>さんはホームに<ruby>戻<rt>もど</rt></ruby>りながら<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>早<rt>はや</rt></ruby>めに<ruby>来<rt>く</rt></ruby>れば、<ruby>何<rt>なに</rt></ruby>でも<ruby>間<rt>ま</rt></ruby>に<ruby>合<rt>あ</rt></ruby>う。<ruby>一番<rt>いちばん</rt></ruby><ruby>大事<rt>だいじ</rt></ruby>なのは、<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>遅刻<rt>ちこく</rt></ruby>しないことだ。」</p>
 </section>
 
-<section class="chapter" data-chapter="3">
+<section class="chapter" data-chapter="3" id="ch-3">
   <h3><span class="ch-num">第3章</span> オフィスでの<ruby>一日<rt>いちにち</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p>ホームに<ruby>戻<rt>もど</rt></ruby>ると、やってきた<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>り<ruby>込<rt>こ</rt></ruby>んだ。<ruby>車内<rt>しゃない</rt></ruby>はとても<ruby>混雑<rt>こんざつ</rt></ruby>していて、<ruby>立<rt>た</rt></ruby>つのもやっとな<ruby>程<rt>ほど</rt></ruby>だった。<ruby>車内案内<rt>しゃないあんない</rt></ruby>が<ruby>流<rt>なが</rt></ruby>れた。「<ruby>次<rt>つぎ</rt></ruby>は<ruby>新宿<rt>しんじゅく</rt></ruby>です。ドアは<ruby>左側<rt>ひだりがわ</rt></ruby>に<ruby>開<rt>ひら</rt></ruby>きます。お<ruby>忘<rt>わす</rt></ruby>れ<ruby>物<rt>もの</rt></ruby>に<ruby>注意<rt>ちゅうい</rt></ruby>してください。」20<ruby>分後<rt>ふんご</rt></ruby>、<ruby>終点<rt>しゅうてん</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>に<ruby>着<rt>つ</rt></ruby>き、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>降<rt>お</rt></ruby>りて、<ruby>会社<rt>かいしゃ</rt></ruby>のオフィスビルまで<ruby>歩<rt>ある</rt></ruby>いていった。</p>
@@ -955,7 +1029,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
 <article class="session" data-session="2">
 <h2>Сессия 2 — Ланч, звонок, 市役所<span class="session-sub">Главы 4・5・6 · ~10 мин чтения</span></h2>
 
-<section class="chapter" data-chapter="4">
+<section class="chapter" data-chapter="4" id="ch-4">
   <h3><span class="ch-num">第4章</span> ランチタイム</h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>午後一時<rt>ごごいちじ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんと<ruby>二人<rt>ふたり</rt></ruby>の<ruby>同僚<rt>どうりょう</rt></ruby>、<ruby>佐藤<rt>さとう</rt></ruby>さんと<ruby>鈴木<rt>すずき</rt></ruby>さんは、<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>昼ご飯<rt>ひるごはん</rt></ruby>を<ruby>食<rt>た</rt></ruby>べに<ruby>行<rt>い</rt></ruby>くことにした。</p>
@@ -981,7 +1055,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p>「おいしいものを<ruby>食<rt>た</rt></ruby>べたな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>店<rt>みせ</rt></ruby>を<ruby>出<rt>で</rt></ruby>ながら<ruby>思<rt>おも</rt></ruby>った。「でも、<ruby>昼休<rt>ひるやす</rt></ruby>みはあっというまだ。<ruby>時間内<rt>じかんない</rt></ruby>にオフィスに<ruby>戻<rt>もど</rt></ruby>らないと。」</p>
 </section>
 
-<section class="chapter" data-chapter="5">
+<section class="chapter" data-chapter="5" id="ch-5">
   <h3><span class="ch-num">第5章</span> <ruby>大切<rt>たいせつ</rt></ruby>な<ruby>電話<rt>でんわ</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p>カフェを<ruby>出<rt>で</rt></ruby>ると、<ruby>田中<rt>たなか</rt></ruby>さんはポケットの<ruby>中<rt>なか</rt></ruby>で<ruby>携帯電話<rt>けいたいでんわ</rt></ruby>が<ruby>鳴<rt>な</rt></ruby>っているのを<ruby>感<rt>かん</rt></ruby>じた。<ruby>画面<rt>がめん</rt></ruby>には、<ruby>姉<rt>あね</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>が<ruby>表示<rt>ひょうじ</rt></ruby>されていた。</p>
@@ -1006,7 +1080,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p>「<ruby>家族<rt>かぞく</rt></ruby>がもうすぐ<ruby>来<rt>く</rt></ruby>るな。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>思<rt>おも</rt></ruby>った。「<ruby>準備<rt>じゅんび</rt></ruby>する<ruby>時間<rt>じかん</rt></ruby>を<ruby>見<rt>み</rt></ruby>つけないと。<ruby>仕事<rt>しごと</rt></ruby>が、<ruby>親戚<rt>しんせき</rt></ruby>との<ruby>面会<rt>めんかい</rt></ruby>を<ruby>邪魔<rt>じゃま</rt></ruby>しないと<ruby>良<rt>よ</rt></ruby>いけど。」</p>
 </section>
 
-<section class="chapter" data-chapter="6">
+<section class="chapter" data-chapter="6" id="ch-6">
   <h3><span class="ch-num">第6章</span> <ruby>市役所<rt>しゃくしょ</rt></ruby>と<ruby>体調<rt>たいちょう</rt></ruby>の<ruby>変化<rt>へんか</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>昼ご飯<rt>ひるごはん</rt></ruby>の<ruby>後<rt>あと</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>急<rt>きゅう</rt></ruby>に<ruby>市役所<rt>しゃくしょ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>かなければならなくなった。<ruby>住民票<rt>じゅうみんひょう</rt></ruby>の<ruby>証明書<rt>しょうめいしょ</rt></ruby>が<ruby>必要<rt>ひつよう</rt></ruby>だったからだ。<ruby>上司<rt>じょうし</rt></ruby>は<ruby>一時間<rt>いちじかん</rt></ruby>だけ<ruby>外<rt>そと</rt></ruby>しても<ruby>良<rt>い</rt></ruby>いと<ruby>許可<rt>きょか</rt></ruby>してくれたが、3<ruby>時<rt>じ</rt></ruby>までに<ruby>戻<rt>もど</rt></ruby>るように<ruby>言<rt>い</rt></ruby>われた。</p>
@@ -1029,7 +1103,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
 <article class="session" data-session="3">
 <h2>Сессия 3 — Покупки, дом, утро<span class="session-sub">Главы 7・8・9 · ~10 мин чтения</span></h2>
 
-<section class="chapter" data-chapter="7">
+<section class="chapter" data-chapter="7" id="ch-7">
   <h3><span class="ch-num">第7章</span> <ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>と<ruby>近所<rt>きんじょ</rt></ruby>の<ruby>人<rt>ひと</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>仕事<rt>しごと</rt></ruby>が<ruby>終<rt>お</rt></ruby>わった<ruby>後<rt>あと</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>同僚<rt>どうりょう</rt></ruby>にさよならを<ruby>言<rt>い</rt></ruby>って、<ruby>駅<rt>えき</rt></ruby>の<ruby>近<rt>ちか</rt></ruby>くにある<ruby>大<rt>おお</rt></ruby>きなデパートとスーパーへ、<ruby>食料品<rt>しょくりょうひん</rt></ruby>と<ruby>家<rt>いえ</rt></ruby>のものを<ruby>買<rt>か</rt></ruby>いに<ruby>行<rt>い</rt></ruby>った。</p>
@@ -1061,7 +1135,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p>「<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>は<ruby>終<rt>お</rt></ruby>わった。」と<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>店<rt>みせ</rt></ruby>を<ruby>出<rt>で</rt></ruby>ながら<ruby>思<rt>おも</rt></ruby>った。「そろそろ<ruby>帰<rt>かえ</rt></ruby>ろう。<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>遅<rt>おく</rt></ruby>れなければ、すぐ<ruby>家<rt>いえ</rt></ruby>に<ruby>着<rt>つ</rt></ruby>くはずだ。」</p>
 </section>
 
-<section class="chapter" data-chapter="8">
+<section class="chapter" data-chapter="8" id="ch-8">
   <h3><span class="ch-num">第8章</span> <ruby>帰宅<rt>きたく</rt></ruby>と<ruby>家族<rt>かぞく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>夕方<rt>ゆうがた</rt></ruby>には<ruby>雨<rt>あめ</rt></ruby>は<ruby>止<rt>と</rt></ruby>んでいたが、<ruby>外<rt>そと</rt></ruby>は<ruby>涼<rt>すず</rt></ruby>しくなっていた。<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>地下鉄<rt>ちかてつ</rt></ruby>で<ruby>自宅<rt>じたく</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>まで<ruby>行<rt>い</rt></ruby>き、<ruby>降<rt>お</rt></ruby>りて、タクシーを<ruby>使<rt>つか</rt></ruby>うことにした。<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>の<ruby>袋<rt>ふくろ</rt></ruby>が<ruby>重<rt>おも</rt></ruby>かったからだ。</p>
@@ -1085,7 +1159,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p>「<ruby>家<rt>いえ</rt></ruby>はいつもこんなに<ruby>良<rt>よ</rt></ruby>いな。」と<ruby>田中<rt>たなか</rt></ruby>さんはベッドに<ruby>入<rt>はい</rt></ruby>りながら<ruby>思<rt>おも</rt></ruby>った。「<ruby>明日<rt>あした</rt></ruby>もまた<ruby>早起<rt>はやお</rt></ruby>きだ。<ruby>良<rt>よ</rt></ruby>く<ruby>眠<rt>ねむ</rt></ruby>って、<ruby>仕事<rt>しごと</rt></ruby>を<ruby>頑張<rt>がんば</rt></ruby>ろう。」</p>
 </section>
 
-<section class="chapter" data-chapter="9">
+<section class="chapter" data-chapter="9" id="ch-9">
   <h3><span class="ch-num">第9章</span> <ruby>翌朝<rt>よくあさ</rt></ruby>の<ruby>決意<rt>けつい</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>翌朝<rt>よくあさ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはいつものように6<ruby>時<rt>じ</rt></ruby>に<ruby>起<rt>お</rt></ruby>きた。<ruby>窓<rt>まど</rt></ruby>の<ruby>外<rt>そと</rt></ruby>では<ruby>太陽<rt>たいよう</rt></ruby>が<ruby>輝<rt>かがや</rt></ruby>いていて、<ruby>昨日<rt>きのう</rt></ruby>よりも<ruby>天気<rt>てんき</rt></ruby>が<ruby>良<rt>よ</rt></ruby>さそうだった。<ruby>彼<rt>かれ</rt></ruby>は<ruby>妻<rt>つま</rt></ruby>を<ruby>起<rt>お</rt></ruby>こさないように、<ruby>静<rt>しず</rt></ruby>かにベッドから<ruby>降<rt>お</rt></ruby>りて、<ruby>台所<rt>だいどころ</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。</p>
@@ -1113,7 +1187,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
 <article class="session" data-session="4">
 <h2>Сессия 4 — Зубной, презентация, семья<span class="session-sub">Главы 10・11・12・13 + ［おわり］</span></h2>
 
-<section class="chapter" data-chapter="10">
+<section class="chapter" data-chapter="10" id="ch-10">
   <h3><span class="ch-num">第10章</span> <ruby>歯医者<rt>はいしゃ</rt></ruby>での<ruby>朝<rt>あさ</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p>その<ruby>日<rt>ひ</rt></ruby>の<ruby>午後<rt>ごご</rt></ruby>、<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>少<rt>すこ</rt></ruby>し<ruby>早<rt>はや</rt></ruby>く<ruby>出<rt>で</rt></ruby>て、<ruby>田中<rt>たなか</rt></ruby>さんは<ruby>予約<rt>よやく</rt></ruby>していた<ruby>歯科<rt>しか</rt></ruby><ruby>医院<rt>いいん</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。<ruby>駅<rt>えき</rt></ruby>から<ruby>歩<rt>ある</rt></ruby>いて5<ruby>分<rt>ふん</rt></ruby>の<ruby>所<rt>ところ</rt></ruby>に、<ruby>小<rt>ちい</rt></ruby>さな「<ruby>桜<rt>さくら</rt></ruby><ruby>歯科<rt>しか</rt></ruby><ruby>医院<rt>いいん</rt></ruby>」があった。<ruby>受付<rt>うけつけ</rt></ruby>には「<ruby>診察時間<rt>しんさつじかん</rt></ruby>：<ruby>午前<rt>ごぜん</rt></ruby>9<ruby>時<rt>じ</rt></ruby>から<ruby>午後<rt>ごご</rt></ruby>7<ruby>時<rt>じ</rt></ruby>まで。<ruby>予約<rt>よやく</rt></ruby>のない<ruby>方<rt>かた</rt></ruby>はお<ruby>待<rt>ま</rt></ruby>ちいただく<ruby>場合<rt>ばあい</rt></ruby>がございます。」と<ruby>書<rt>か</rt></ruby>いてあった。</p>
@@ -1132,7 +1206,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p><ruby>会社<rt>かいしゃ</rt></ruby>へ<ruby>戻<rt>もど</rt></ruby>る<ruby>電車<rt>でんしゃ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で、<ruby>彼<rt>かれ</rt></ruby>は<ruby>明日<rt>あした</rt></ruby>のプレゼンの<ruby>資料<rt>しりょう</rt></ruby>をもう<ruby>一度<rt>いちど</rt></ruby><ruby>見直<rt>みなお</rt></ruby>した。</p>
 </section>
 
-<section class="chapter" data-chapter="11">
+<section class="chapter" data-chapter="11" id="ch-11">
   <h3><span class="ch-num">第11章</span> <ruby>大切<rt>たいせつ</rt></ruby>なプレゼンテーション</h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>翌日<rt>よくじつ</rt></ruby>の<ruby>午前中<rt>ごぜんちゅう</rt></ruby>、<ruby>会議室<rt>かいぎしつ</rt></ruby>には<ruby>大勢<rt>おおぜい</rt></ruby>の<ruby>人<rt>ひと</rt></ruby>が<ruby>集<rt>あつ</rt></ruby>まっていた。<ruby>田中<rt>たなか</rt></ruby>さんはネクタイを<ruby>直<rt>なお</rt></ruby>して、<ruby>書類<rt>しょるい</rt></ruby>をきちんと<ruby>並<rt>なら</rt></ruby>べた。パソコンとプロジェクターの<ruby>準備<rt>じゅんび</rt></ruby>も、あらかじめ<ruby>済<rt>す</rt></ruby>ませておいた。</p>
@@ -1154,7 +1228,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p><ruby>田中<rt>たなか</rt></ruby>さんは<ruby>安堵<rt>あんど</rt></ruby>の<ruby>表情<rt>ひょうじょう</rt></ruby>を<ruby>浮<rt>う</rt></ruby>かべた。「<ruby>頑張<rt>がんば</rt></ruby>って<ruby>良<rt>よ</rt></ruby>かった。もし<ruby>準備<rt>じゅんび</rt></ruby>を<ruby>怠<rt>おこた</rt></ruby>っていたら、こんな<ruby>結果<rt>けっか</rt></ruby>にはならなかっただろうな。」</p>
 </section>
 
-<section class="chapter" data-chapter="12">
+<section class="chapter" data-chapter="12" id="ch-12">
   <h3><span class="ch-num">第12章</span> <ruby>家族<rt>かぞく</rt></ruby>との<ruby>再会<rt>さいかい</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>金曜日<rt>きんようび</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはできるだけ<ruby>早<rt>はや</rt></ruby>く<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>出<rt>で</rt></ruby>て、<ruby>駅前<rt>えきまえ</rt></ruby>の<ruby>花屋<rt>はなや</rt></ruby>で<ruby>花束<rt>はなたば</rt></ruby>を<ruby>買<rt>か</rt></ruby>った。そして、<ruby>妻<rt>つま</rt></ruby>と<ruby>息子<rt>むすこ</rt></ruby>を<ruby>連<rt>つ</rt></ruby>れて、<ruby>姉<rt>あね</rt></ruby>の<ruby>家<rt>いえ</rt></ruby>へ<ruby>向<rt>む</rt></ruby>かった。<ruby>両親<rt>りょうしん</rt></ruby>と<ruby>兄<rt>あに</rt></ruby>と<ruby>姉<rt>あね</rt></ruby>の<ruby>家族<rt>かぞく</rt></ruby>が、もう<ruby>集<rt>あつ</rt></ruby>まっていた。</p>
@@ -1175,7 +1249,7 @@ body.theme-light .anki-extra-sw{ color: #086020; }
   <p><ruby>夜<rt>よる</rt></ruby><ruby>遅<rt>おく</rt></ruby>くまで、<ruby>家族<rt>かぞく</rt></ruby>で<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>ったり、<ruby>昔話<rt>むかしばなし</rt></ruby>をしたりして、<ruby>楽<rt>たの</rt></ruby>しい<ruby>時間<rt>じかん</rt></ruby>を<ruby>過<rt>す</rt></ruby>ごした。</p>
 </section>
 
-<section class="chapter" data-chapter="13">
+<section class="chapter" data-chapter="13" id="ch-13">
   <h3><span class="ch-num">第13章</span> <ruby>新<rt>あたら</rt></ruby>しい<ruby>朝<rt>あさ</rt></ruby></h3>
   <label class="chapter-read"><input type="checkbox" class="ch-check"> прочитано</label>
   <p><ruby>週末<rt>しゅうまつ</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>、<ruby>田中<rt>たなか</rt></ruby>さんはいつもより<ruby>少<rt>すこ</rt></ruby>し<ruby>遅<rt>おく</rt></ruby>く<ruby>起<rt>お</rt></ruby>きた。<ruby>窓<rt>まど</rt></ruby>から<ruby>柔<rt>やわ</rt></ruby>らかい<ruby>日差<rt>ひざ</rt></ruby>しが<ruby>差<rt>さ</rt></ruby>し<ruby>込<rt>こ</rt></ruby>んでいた。ゆみさんはもう<ruby>起<rt>お</rt></ruby>きていて、<ruby>リビング<rt>りびんぐ</rt></ruby>で<ruby>健太<rt>けんた</rt></ruby>と<ruby>遊<rt>あそ</rt></ruby>んでいた。</p>
@@ -5249,6 +5323,35 @@ body.theme-light .anki-extra-sw{ color: #086020; }
     if (e.key === 'Escape' && settingsModal.classList.contains('open')) closeSettings();
   });
 
+  /* ---------- Перейти к главе ---------- */
+  var selJumpChapter = document.getElementById('sel-jump-chapter');
+  if (selJumpChapter) {
+    var chs = document.querySelectorAll('.chapter[data-chapter]');
+    chs.forEach(function (ch) {
+      var n = ch.getAttribute('data-chapter');
+      var h3 = ch.querySelector('h3');
+      var titleText = h3 ? h3.textContent.replace(/\s+/g, ' ').trim() : ('Глава ' + n);
+      var opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = '第' + n + '章 — ' + titleText;
+      selJumpChapter.appendChild(opt);
+    });
+    selJumpChapter.addEventListener('change', function () {
+      var v = selJumpChapter.value;
+      if (!v) return;
+      var target = document.getElementById('ch-' + v);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Подсветим заголовок на секунду
+        target.style.transition = 'background 0.4s';
+        var orig = target.style.background;
+        target.style.background = 'rgba(255, 180, 60, 0.18)';
+        setTimeout(function () { target.style.background = orig; }, 1200);
+      }
+      selJumpChapter.value = '';
+    });
+  }
+
   /* ---------- Выбор цвета выделения текста ---------- */
   var selSelectionColor = document.getElementById('sel-selection-color');
   var btnResetSelection = document.getElementById('btn-reset-selection');
@@ -5290,6 +5393,90 @@ body.theme-light .anki-extra-sw{ color: #086020; }
     'adv':    '🟢 Наречия'
   };
   var CAT_ORDER = ['verb', 'i_adj', 'na_adj', 'adv', 'phrase', 'noun', 'sign'];
+
+  /* ---------- Постоянные выделения пользователя ---------- */
+  function isInChapterText(node) {
+    if (!node) return false;
+    var el = node.nodeType === 1 ? node : node.parentElement;
+    while (el) {
+      if (el.tagName === 'P' && el.closest && el.closest('.chapter')) return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+  function persistSelection() {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+    var range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    // Только выделения внутри <p> глав
+    if (!isInChapterText(range.startContainer) || !isInChapterText(range.endContainer)) return;
+    // Не оборачиваем, если начало уже внутри существующего mark (иначе будет вложение)
+    var startMark = (range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement);
+    if (startMark && startMark.closest && startMark.closest('mark.user-highlight')) {
+      // Расширяем существующий mark до конца выделения
+      var existing = startMark.closest('mark.user-highlight');
+      try {
+        range.setStartBefore(existing);
+        existing.parentNode.insertBefore(existing, existing);
+        // Заменяем содержимое между startBefore(existing) и end на mark
+        var r2 = document.createRange();
+        r2.setStartBefore(existing);
+        r2.setEnd(range.endContainer, range.endOffset);
+        var frag2 = r2.extractContents();
+        existing.appendChild(frag2);
+        sel.removeAllRanges();
+        sel.addRange(document.createRange());
+        sel.getRangeAt(0).selectNodeContents(existing);
+        return;
+      } catch (e) {}
+    }
+    // Оборачиваем через extractContents (работает через границы ruby/span)
+    try {
+      var frag = range.extractContents();
+      var mark = document.createElement('mark');
+      mark.className = 'user-highlight';
+      mark.appendChild(frag);
+      range.insertNode(mark);
+      // Нормализуем соседей, чтобы не было пустых текстовых узлов
+      mark.parentNode && mark.parentNode.normalize();
+      sel.removeAllRanges();
+    } catch (e) {
+      // ignore
+    }
+  }
+  document.addEventListener('mouseup', function (e) {
+    // Не реагируем, если клик по настройкам/кнопкам/модалкам
+    if (e.target.closest && e.target.closest('.settings-modal, .settings-fab, .anki-legend-modal, .chapter-vocab, .paragraph-vocab, .vocab-group, button, select, input, textarea, label')) return;
+    // Игнорируем клик по самому mark (там обрабатывается отдельно)
+    if (e.target.closest && e.target.closest('mark.user-highlight')) return;
+    // Небольшая задержка чтобы selection успел обновиться
+    setTimeout(persistSelection, 10);
+  });
+  // Клик по mark — удаляет его (развыделение)
+  document.addEventListener('click', function (e) {
+    var m = e.target.closest && e.target.closest('mark.user-highlight');
+    if (!m) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var parent = m.parentNode;
+    while (m.firstChild) parent.insertBefore(m.firstChild, m);
+    parent.removeChild(m);
+    parent.normalize();
+  }, true);
+  // Кнопка "Очистить выделения"
+  var btnClearHighlights = document.getElementById('btn-clear-highlights');
+  if (btnClearHighlights) {
+    btnClearHighlights.addEventListener('click', function () {
+      var marks = document.querySelectorAll('mark.user-highlight');
+      marks.forEach(function (m) {
+        var parent = m.parentNode;
+        while (m.firstChild) parent.insertBefore(m.firstChild, m);
+        parent.removeChild(m);
+      });
+      document.querySelectorAll('.chapter, .session').forEach(function (el) { el.normalize && el.normalize(); });
+    });
+  }
   function injectChapterVocab() {
     // Предкомпилируем regex по словарю (длинные слова сначала)
     var byLen = {};
